@@ -1,0 +1,26 @@
+{
+  "name": "sails-pay",
+  "version": "0.0.1",
+  "private": true,
+  "keywords": [
+    "Lemon Squeezy",
+    "Sails",
+    "Pay",
+    "Payments",
+    "lemon-squeezy",
+    "payment",
+    "payments",
+    "payment-gateway",
+    "sails",
+    "sails.js",
+    "payment-integration",
+    "online-payments",
+    "transaction-processing",
+    "ecommerce"
+  ],
+  "author": "Kelvin Omereshone<kelvin@sailscasts.com>",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*"
+  ]
+}

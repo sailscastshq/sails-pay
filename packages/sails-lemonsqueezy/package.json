@@ -1,0 +1,36 @@
+{
+  "name": "sails-lemonsqueezy",
+  "version": "0.0.1",
+  "description": "Lemon Squeezy adapter for Sails Pay",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test"
+  },
+  "homepage": "https://docs.sailcasts.com/sails-pay/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sailscastshq/sails-pay.git",
+    "directory": "packages/sails-lemonsqueezy"
+  },
+  "bugs": {
+    "url": "https://github.com/sailscastshq/sails-pay/issues"
+  },
+  "keywords": [
+    "Lemon Squeezy",
+    "Sails",
+    "Pay",
+    "Payments",
+    "lemon-squeezy",
+    "payment",
+    "payments",
+    "payment-gateway",
+    "sails",
+    "sails.js",
+    "payment-integration",
+    "online-payments",
+    "transaction-processing",
+    "ecommerce"
+  ],
+  "author": "Kelvin Omereshone <kelvin@sailscasts.com>",
+  "license": "MIT"
+}
