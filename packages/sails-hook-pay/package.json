@@ -26,6 +26,10 @@
     "payment-processor",
     "lemonsqueezy"
   ],
+  "sails": {
+    "isHook": true,
+    "hookName": "pay"
+  },
   "author": "Kelvin Omereshone <kelvin@sailscasts.com>",
   "license": "MIT"
 }
