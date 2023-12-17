@@ -101,7 +101,7 @@
       "single",
       { "avoidEscape": false, "allowTemplateLiterals": true }
     ],
-    "semi": ["warn", "always"],
+    "semi": ["never"],
     "semi-spacing": ["warn", { "before": false, "after": true }],
     "semi-style": ["warn", "last"]
   }

@@ -17,6 +17,7 @@
     "sails-lemonsqueezy": "^0.0.1"
   },
   "devDependencies": {
+    "@types/node": "^20.10.4",
     "eslint": "5.16.0"
   },
   "scripts": {
