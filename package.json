@@ -16,7 +16,8 @@
     "payment-integration",
     "online-payments",
     "transaction-processing",
-    "ecommerce"
+    "ecommerce",
+    "paypal"
   ],
   "author": "Kelvin Omereshone<kelvin@sailscasts.com>",
   "license": "MIT",

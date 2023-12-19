@@ -5,6 +5,7 @@ The modern payments engine for Sails applications. Easily setup payments with pr
 ## Supported payment providers
 
 - [Lemon Squeezy](https://lemonsqueezy)(coming soon)
+- [PayPal](https://paypal.com)(coming soon)
 
 ## Contributing
 
