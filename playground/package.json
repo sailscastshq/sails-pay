@@ -35,6 +35,6 @@
   "author": "koo",
   "license": "",
   "engines": {
-    "node": "^20.8"
+    "node": ">=18.19"
   }
 }
