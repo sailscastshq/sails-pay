@@ -1,0 +1,37 @@
+{
+  "name": "sails-pay",
+  "version": "0.0.1",
+  "description": "The modern payments engine for Sails applications",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "homepage": "https://docs.sailcasts.com/pay/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sailscastshq/sails-pay.git",
+    "directory": "packages/sails-hook-pay"
+  },
+  "bugs": {
+    "url": "https://github.com/sailscastshq/sails-pay/issues"
+  },
+  "keywords": [
+    "subscription",
+    "engine",
+    "sails",
+    "payment-integration",
+    "payment-provider",
+    "sails-hook",
+    "payment-processor",
+    "lemonsqueezy"
+  ],
+  "sails": {
+    "isHook": true,
+    "hookName": "pay"
+  },
+  "author": "Kelvin Omereshone <kelvin@sailscasts.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@sails-pay/lemonsqueezy": "^0.0.1"
+  }
+}

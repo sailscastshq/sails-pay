@@ -1,0 +1,39 @@
+{
+  "private": true,
+  "keywords": [
+    "Lemon Squeezy",
+    "Sails",
+    "Pay",
+    "Payments",
+    "lemon-squeezy",
+    "payment",
+    "payments",
+    "payment-gateway",
+    "sails",
+    "sails.js",
+    "payment-integration",
+    "online-payments",
+    "transaction-processing",
+    "ecommerce",
+    "paypal"
+  ],
+  "author": "Kelvin Omereshone<kelvin@sailscasts.com>",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*",
+    "playground"
+  ],
+  "devDependencies": {
+    "@commitlint/cli": "^18.4.3",
+    "@commitlint/config-conventional": "^18.4.3",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
+    "prettier": "3.1.1"
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
+  },
+  "scripts": {
+    "prepare": "husky install"
+  }
+}
