@@ -1,5 +1,5 @@
 {
-  "name": "sails-hook-pay",
+  "name": "sails-pay",
   "version": "0.0.1",
   "description": "The modern payments engine for Sails applications",
   "main": "index.js",

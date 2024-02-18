@@ -1,5 +1,5 @@
 module.exports.pay = {
-  providers: {
+  processors: {
     default: {
       adapter: 'sails-lemonsqueezy'
     }
