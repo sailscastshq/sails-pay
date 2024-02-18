@@ -30,5 +30,8 @@
     "hookName": "pay"
   },
   "author": "Kelvin Omereshone <kelvin@sailscasts.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@sails-pay/lemonsqueezy": "^0.0.1"
+  }
 }
