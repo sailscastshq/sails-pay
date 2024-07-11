@@ -30,7 +30,6 @@
   "homepage": "https://github.com/sailscastshq/sails-pay#readme",
   "dependencies": {
     "machine": "^15.2.3",
-    "node-fetch": "^2.7.0",
     "undici": "^6.19.2"
   }
 }
