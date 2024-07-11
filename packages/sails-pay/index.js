@@ -30,7 +30,7 @@ module.exports = function (sails) {
         )
         switch (providerName) {
           case 'lemonsqueezy':
-            console.log()
+          case 'paystack':
             const paymentProvider = require(
               sails.config.pay.providers[provider].adapter
             )
@@ -38,7 +38,7 @@ module.exports = function (sails) {
             return paymentProvider
           default:
             throw new Error(
-              'Invalid payment provider provided, supported stores are redis or memcached.'
+              'Invalid payment provider provided, supported providers are lemonsqueezy and paystack.'
             )
         }
       }
