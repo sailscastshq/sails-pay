@@ -1,0 +1,35 @@
+{
+  "name": "@sails-pay/paystack",
+  "version": "0.0.1",
+  "description": "Paystack adapter for Sails Pay",
+  "main": "adapter.js",
+  "scripts": {
+    "test": "npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sailscastshq/sails-pay.git",
+    "directory": "packages/sails-lemonsqueezy"
+  },
+  "keywords": [
+    "Paystack",
+    "Sails",
+    "Pay",
+    "Payments",
+    "payment-gateway",
+    "online-payments",
+    "sails",
+    "sails.js",
+    "payment-integration"
+  ],
+  "author": "Kelvin Omereshone <kelvin@sailscasts.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sailscastshq/sails-pay/issues"
+  },
+  "homepage": "https://github.com/sailscastshq/sails-pay#readme",
+  "dependencies": {
+    "machine": "^15.2.3",
+    "undici": "^6.19.2"
+  }
+}
