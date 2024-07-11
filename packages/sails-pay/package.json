@@ -32,7 +32,6 @@
   "author": "Kelvin Omereshone <kelvin@sailscasts.com>",
   "license": "MIT",
   "dependencies": {
-    "@sails-pay/lemonsqueezy": "^0.0.1",
-    "node-fetch": "^3.3.2"
+    "@sails-pay/lemonsqueezy": "^0.0.1"
   }
 }
