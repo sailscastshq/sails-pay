@@ -1,6 +1,6 @@
 {
   "name": "sails-pay",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "The modern payments engine for Sails applications",
   "main": "index.js",
   "scripts": {
