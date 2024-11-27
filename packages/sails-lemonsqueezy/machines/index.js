@@ -1,3 +1,6 @@
 module.exports = {
-  checkout: require('./checkout')
+  checkout: require('./checkout'),
+  subscription: {
+    get: require('./subscription/get')
+  }
 }
