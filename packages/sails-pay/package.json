@@ -1,6 +1,6 @@
 {
   "name": "sails-pay",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "The modern payments engine for Sails applications",
   "main": "index.js",
   "scripts": {
@@ -30,8 +30,5 @@
     "hookName": "pay"
   },
   "author": "Kelvin Omereshone <kelvin@sailscasts.com>",
-  "license": "MIT",
-  "dependencies": {
-    "@sails-pay/lemonsqueezy": "^0.0.1"
-  }
+  "license": "MIT"
 }
