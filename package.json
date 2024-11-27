@@ -20,8 +20,7 @@
   "author": "Kelvin Omereshone<kelvin@sailscasts.com>",
   "license": "MIT",
   "workspaces": [
-    "packages/*",
-    "playground"
+    "packages/*"
   ],
   "devDependencies": {
     "@commitlint/cli": "^18.4.3",
