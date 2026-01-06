@@ -30,7 +30,9 @@ module.exports = require('machine').build({
     },
     chargeUrl: {
       type: 'string',
-      description: 'URL to redirect the customer after payment completion'
+      description: 'URL to redirect the customer after payment completion.',
+      extendedDescription:
+        'Paga will append query params: charge_reference (your payment_reference or Paga-generated), status_message ("success"), and status_code ("0" for success). Example redirect: https://yoursite.com/store?charge_reference=REF123&status_message=success&status_code=0'
     },
     phoneNumber: {
       type: 'string',
@@ -77,25 +79,41 @@ module.exports = require('machine').build({
     // Use configured baseUrl, defaulting to live environment
     const baseUrl = adapterConfig.baseUrl || 'https://checkout.paga.com/'
 
-    // Build query parameters
-    const params = new URLSearchParams()
-    params.append('public_key', publicKey || adapterConfig.publicKey)
-    params.append('amount', amount)
-    params.append('email', email)
-
-    if (currency) params.append('currency', currency)
-    if (paymentReference) params.append('payment_reference', paymentReference)
-    if (chargeUrl) params.append('charge_url', chargeUrl)
-    if (phoneNumber) params.append('phone_number', phoneNumber)
-    if (displayImage) params.append('display_image', displayImage)
-
     // Use provided callbackUrl or fall back to configured default
     const resolvedCallbackUrl = callbackUrl || adapterConfig.callbackUrl
-    if (resolvedCallbackUrl) params.append('callback_url', resolvedCallbackUrl)
 
-    if (fundingSources) params.append('funding_sources', fundingSources)
+    // Warn if localhost URLs are detected
+    if (
+      chargeUrl?.includes('localhost') ||
+      resolvedCallbackUrl?.includes('localhost')
+    ) {
+      console.warn(
+        '[sails-paga] Warning: localhost URLs will not work with Paga. Use a tunneling service like ngrok or localtunnel for local development.'
+      )
+    }
 
-    const checkoutUrl = `${baseUrl}?${params.toString()}`
+    // Build query parameters manually to avoid double-encoding of URLs
+    const params = []
+    params.push(
+      `public_key=${encodeURIComponent(publicKey || adapterConfig.publicKey)}`
+    )
+    params.push(`amount=${encodeURIComponent(amount)}`)
+    params.push(`email=${encodeURIComponent(email)}`)
+
+    if (currency) params.push(`currency=${encodeURIComponent(currency)}`)
+    if (paymentReference)
+      params.push(`payment_reference=${encodeURIComponent(paymentReference)}`)
+    if (chargeUrl) params.push(`charge_url=${encodeURIComponent(chargeUrl)}`)
+    if (phoneNumber)
+      params.push(`phone_number=${encodeURIComponent(phoneNumber)}`)
+    if (displayImage)
+      params.push(`display_image=${encodeURIComponent(displayImage)}`)
+    if (resolvedCallbackUrl)
+      params.push(`callback_url=${encodeURIComponent(resolvedCallbackUrl)}`)
+    if (fundingSources)
+      params.push(`funding_sources=${encodeURIComponent(fundingSources)}`)
+
+    const checkoutUrl = `${baseUrl}?${params.join('&')}`
     return exits.success(checkoutUrl)
   }
 })
