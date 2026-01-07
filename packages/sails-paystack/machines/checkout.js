@@ -107,12 +107,13 @@ module.exports = require('machine').build({
     exits
   ) {
     const adapterConfig = require('../adapter').config
+    const resolvedCallbackUrl = callbackUrl || adapterConfig.callbackUrl
     const payload = JSON.stringify({
       amount,
       email,
       currency,
       reference,
-      callback_url: callbackUrl,
+      ...(resolvedCallbackUrl && { callback_url: resolvedCallbackUrl }),
       plan,
       invoice_limit: invoiceLimit,
       metadata,
