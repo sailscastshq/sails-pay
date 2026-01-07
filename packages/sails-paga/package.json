@@ -1,7 +1,7 @@
 {
-  "name": "@sails-pay/paystack",
+  "name": "@sails-pay/paga",
   "version": "0.1.0",
-  "description": "Paystack adapter for Sails Pay",
+  "description": "Paga adapter for Sails Pay",
   "main": "adapter.js",
   "scripts": {
     "test": "npm run test"
@@ -9,10 +9,10 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sailscastshq/sails-pay.git",
-    "directory": "packages/sails-lemonsqueezy"
+    "directory": "packages/sails-paga"
   },
   "keywords": [
-    "Paystack",
+    "Paga",
     "Sails",
     "Pay",
     "Payments",
@@ -20,7 +20,8 @@
     "online-payments",
     "sails",
     "sails.js",
-    "payment-integration"
+    "payment-integration",
+    "nigeria"
   ],
   "author": "Kelvin Omereshone <kelvin@sailscasts.com>",
   "license": "MIT",
@@ -29,7 +30,6 @@
   },
   "homepage": "https://github.com/sailscastshq/sails-pay#readme",
   "dependencies": {
-    "machine": "^15.2.3",
-    "undici": "^6.19.2"
+    "machine": "^15.2.3"
   }
 }

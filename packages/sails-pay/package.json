@@ -1,6 +1,6 @@
 {
   "name": "sails-pay",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "description": "The modern payments engine for Sails applications",
   "main": "index.js",
   "scripts": {
@@ -30,5 +30,25 @@
     "hookName": "pay"
   },
   "author": "Kelvin Omereshone <kelvin@sailscasts.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "peerDependencies": {
+    "@sails-pay/lemonsqueezy": "*",
+    "@sails-pay/paystack": "*",
+    "@sails-pay/paga": "*",
+    "@sails-pay/flutterwave": "*"
+  },
+  "peerDependenciesMeta": {
+    "@sails-pay/lemonsqueezy": {
+      "optional": true
+    },
+    "@sails-pay/paystack": {
+      "optional": true
+    },
+    "@sails-pay/paga": {
+      "optional": true
+    },
+    "@sails-pay/flutterwave": {
+      "optional": true
+    }
+  }
 }
