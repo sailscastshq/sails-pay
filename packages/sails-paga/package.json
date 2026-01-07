@@ -1,0 +1,35 @@
+{
+  "name": "@sails-pay/paga",
+  "version": "0.0.1",
+  "description": "Paga adapter for Sails Pay",
+  "main": "adapter.js",
+  "scripts": {
+    "test": "npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sailscastshq/sails-pay.git",
+    "directory": "packages/sails-paga"
+  },
+  "keywords": [
+    "Paga",
+    "Sails",
+    "Pay",
+    "Payments",
+    "payment-gateway",
+    "online-payments",
+    "sails",
+    "sails.js",
+    "payment-integration",
+    "nigeria"
+  ],
+  "author": "Kelvin Omereshone <kelvin@sailscasts.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sailscastshq/sails-pay/issues"
+  },
+  "homepage": "https://github.com/sailscastshq/sails-pay#readme",
+  "dependencies": {
+    "machine": "^15.2.3"
+  }
+}
