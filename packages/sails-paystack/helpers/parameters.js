@@ -6,10 +6,10 @@
  */
 
 module.exports = {
-  PAYSTACK_API_KEY: {
+  PAYSTACK_SECRET_KEY: {
     type: 'string',
-    friendlyName: 'API Key',
-    description: 'A valid Paystack API Key',
+    friendlyName: 'Secret Key',
+    description: 'A valid Paystack Secret Key',
     protect: true,
     whereToGet: {
       url: 'https://dashboard.paystack.com/#/settings/developers',

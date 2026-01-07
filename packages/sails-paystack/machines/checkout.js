@@ -4,7 +4,7 @@ module.exports = require('machine').build({
   description: 'Creates and return a checkout authorization URL',
   moreInfoUrl: 'https://paystack.com/docs/api/transaction/#initialize',
   inputs: {
-    apiKey: require('../helpers/parameters').PAYSTACK_API_KEY,
+    secretKey: require('../helpers/parameters').PAYSTACK_SECRET_KEY,
     amount: {
       type: 'number',
       description: 'Amount should be in the subunit of the supported currency'
@@ -89,7 +89,7 @@ module.exports = require('machine').build({
   },
   fn: async function (
     {
-      apiKey,
+      secretKey,
       amount,
       email,
       currency,
@@ -125,7 +125,7 @@ module.exports = require('machine').build({
     const checkout = await fetch('/transaction/initialize', {
       method: 'POST',
       headers: {
-        authorization: `Bearer ${apiKey || adapterConfig.apiKey}`
+        authorization: `Bearer ${secretKey || adapterConfig.secretKey}`
       },
       body: payload
     })
