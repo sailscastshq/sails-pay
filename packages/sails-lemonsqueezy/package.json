@@ -1,6 +1,6 @@
 {
   "name": "@sails-pay/lemonsqueezy",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Lemon Squeezy adapter for Sails Pay",
   "main": "adapter.js",
   "scripts": {
