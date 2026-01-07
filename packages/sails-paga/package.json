@@ -25,6 +25,9 @@
   ],
   "author": "Kelvin Omereshone <kelvin@sailscasts.com>",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "bugs": {
     "url": "https://github.com/sailscastshq/sails-pay/issues"
   },
