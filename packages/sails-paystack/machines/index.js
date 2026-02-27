@@ -1,3 +1,4 @@
 module.exports = {
-  checkout: require('./checkout')
+  checkout: require('./checkout'),
+  verify: require('./verify')
 }
