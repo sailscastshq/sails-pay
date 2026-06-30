@@ -28,6 +28,17 @@ module.exports = function (sails) {
         return {
           apiKey: process.env.PAYSTACK_SECRET_KEY
         }
+      case 'bachs':
+        return {
+          apiKey: process.env.BACHS_API_KEY,
+          baseUrl: process.env.BACHS_BASE_URL,
+          webhookSecret: process.env.BACHS_WEBHOOK_SECRET,
+          returnUrl:
+            process.env.BACHS_RETURN_URL || process.env.BACHS_SUCCESS_URL,
+          successUrl:
+            process.env.BACHS_SUCCESS_URL || process.env.BACHS_RETURN_URL,
+          cancelUrl: process.env.BACHS_CANCEL_URL
+        }
       case 'paga':
         return {
           publicKey: process.env.PAGA_PUBLIC_KEY,
@@ -67,6 +78,7 @@ module.exports = function (sails) {
         switch (providerName) {
           case 'lemonsqueezy':
           case 'paystack':
+          case 'bachs':
           case 'paga':
           case 'flutterwave':
             const paymentProvider = require(providerConfig.adapter)
@@ -75,7 +87,7 @@ module.exports = function (sails) {
             return paymentProvider
           default:
             throw new Error(
-              'Invalid payment provider provided, supported providers are lemonsqueezy, paystack, paga, and flutterwave.'
+              'Invalid payment provider provided, supported providers are lemonsqueezy, paystack, bachs, paga, and flutterwave.'
             )
         }
       }

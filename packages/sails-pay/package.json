@@ -32,12 +32,16 @@
   "author": "Kelvin Omereshone <kelvin@sailscasts.com>",
   "license": "MIT",
   "peerDependencies": {
+    "@sails-pay/bachs": "*",
     "@sails-pay/lemonsqueezy": "*",
     "@sails-pay/paystack": "*",
     "@sails-pay/paga": "*",
     "@sails-pay/flutterwave": "*"
   },
   "peerDependenciesMeta": {
+    "@sails-pay/bachs": {
+      "optional": true
+    },
     "@sails-pay/lemonsqueezy": {
       "optional": true
     },
