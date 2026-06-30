@@ -28,6 +28,9 @@
   ],
   "author": "Kelvin Omereshone <kelvin@sailscasts.com>",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "machine": "^15.2.3",
     "undici": "^6.19.2"
