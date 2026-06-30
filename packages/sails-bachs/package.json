@@ -1,0 +1,35 @@
+{
+  "name": "@sails-pay/bachs",
+  "version": "0.1.0",
+  "description": "Bachs adapter for Sails Pay",
+  "main": "adapter.js",
+  "scripts": {
+    "test": "node --test"
+  },
+  "homepage": "https://github.com/sailscastshq/sails-pay#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sailscastshq/sails-pay.git",
+    "directory": "packages/sails-bachs"
+  },
+  "bugs": {
+    "url": "https://github.com/sailscastshq/sails-pay/issues"
+  },
+  "keywords": [
+    "Bachs",
+    "Sails",
+    "Pay",
+    "Payments",
+    "payment-gateway",
+    "online-payments",
+    "sails",
+    "sails.js",
+    "payment-integration"
+  ],
+  "author": "Kelvin Omereshone <kelvin@sailscasts.com>",
+  "license": "MIT",
+  "dependencies": {
+    "machine": "^15.2.3",
+    "undici": "^6.19.2"
+  }
+}
