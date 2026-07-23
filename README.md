@@ -70,6 +70,28 @@ const charge = await sails.pay.verify({
 })
 ```
 
+## Bachs customer portal
+
+Create a fresh, short-lived customer portal session with an API key that has
+the `customers:write` permission:
+
+```js
+const portalUrl = await sails.pay.customer.portal({
+  customerId: 'cust_1a2b3c4d5e6f'
+})
+```
+
+When Bachs is not the default provider, select it explicitly:
+
+```js
+const portalUrl = await sails.pay
+  .provider('bachs')
+  .customer.portal({ customerId: 'cust_1a2b3c4d5e6f' })
+```
+
+Each call creates a new portal session. The adapter does not cache or persist
+the returned URL.
+
 ## Contributing
 
 If you're interested in contributing to Sails Pay, please read our [contributing guide](https://github.com/sailscastshq/sails-pay/blob/main/.github/CONTRIBUTING.md).
