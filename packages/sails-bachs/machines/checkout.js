@@ -3,6 +3,7 @@ const {
   buildCheckoutSessionPayload,
   buildPureCheckoutPayload
 } = require('../helpers/payloads')
+const validateCheckoutItems = require('../helpers/validate-checkout-items')
 const parameters = require('../helpers/parameters')
 
 module.exports = require('machine').build({
@@ -16,7 +17,7 @@ module.exports = require('machine').build({
     items: {
       type: 'ref',
       description:
-        'Product items for Bachs Checkout Sessions. Each item should use product or productId plus optional quantity and amount.'
+        'Product items for Bachs Checkout Sessions. Supports catalog pricing, fixed amount shorthand, advanced pricing, and chosenAmount.'
     },
     productCollectionId: {
       type: 'string',
@@ -141,10 +142,6 @@ module.exports = require('machine').build({
       inputs.productCollectionId || inputs.productCollection
     )
     const shouldUseCheckoutSession = hasItems || hasProductCollection
-    const path = shouldUseCheckoutSession ? '/checkout-sessions' : '/checkouts'
-    const payload = shouldUseCheckoutSession
-      ? buildCheckoutSessionPayload(inputs, adapterConfig)
-      : buildPureCheckoutPayload(inputs, adapterConfig)
 
     if (shouldUseCheckoutSession && hasItems === hasProductCollection) {
       return exits.invalidRequest({
@@ -152,6 +149,19 @@ module.exports = require('machine').build({
           'Provide exactly one of items or productCollectionId for a Bachs checkout session.'
       })
     }
+
+    if (hasItems) {
+      const validationError = validateCheckoutItems(inputs.items)
+
+      if (validationError) {
+        return exits.invalidRequest(validationError)
+      }
+    }
+
+    const path = shouldUseCheckoutSession ? '/checkout-sessions' : '/checkouts'
+    const payload = shouldUseCheckoutSession
+      ? buildCheckoutSessionPayload(inputs, adapterConfig)
+      : buildPureCheckoutPayload(inputs, adapterConfig)
 
     if (!shouldUseCheckoutSession && !payload.pricing) {
       return exits.invalidRequest({
