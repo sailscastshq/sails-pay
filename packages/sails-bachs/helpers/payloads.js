@@ -44,13 +44,22 @@ function buildProductCart(items) {
     return undefined
   }
 
-  return items.map((item) =>
-    withoutUndefined({
+  return items.map((item) => {
+    const pricing =
+      item.amount !== undefined
+        ? normalizePricing({
+            type: 'fixed',
+            amount: item.amount
+          })
+        : normalizePricing(item.pricing)
+
+    return withoutUndefined({
       product_id: item.product || item.productId,
       quantity: item.quantity,
-      amount: item.amount
+      pricing,
+      amount: item.chosenAmount
     })
-  )
+  })
 }
 
 function buildCheckoutSessionPayload(inputs, adapterConfig = {}) {
@@ -76,25 +85,44 @@ function buildCheckoutSessionPayload(inputs, adapterConfig = {}) {
   })
 }
 
-function buildPricingPayload(inputs) {
-  let pricing
-
-  if (inputs.pricing) {
-    const { currencyOptions, ...pricingInput } = inputs.pricing
-
-    pricing = withoutUndefined({
-      ...pricingInput,
-      currency_options: currencyOptions || inputs.currencyOptions
-    })
-  } else {
-    pricing = withoutUndefined({
-      currency: inputs.currency,
-      amount: inputs.amount,
-      currency_options: inputs.currencyOptions
-    })
+function normalizePricing(pricing, fallbackCurrencyOptions) {
+  if (!pricing || typeof pricing !== 'object' || Array.isArray(pricing)) {
+    return undefined
   }
 
-  return Object.keys(pricing).length > 0 ? pricing : undefined
+  const {
+    type,
+    presetAmount,
+    minimumAmount,
+    maximumAmount,
+    currencyOptions,
+    ...pricingInput
+  } = pricing
+  const normalizedPricing = withoutUndefined({
+    ...pricingInput,
+    price_type: type,
+    preset_amount: presetAmount,
+    minimum_amount: minimumAmount,
+    maximum_amount: maximumAmount,
+    currency_options:
+      currencyOptions === undefined ? fallbackCurrencyOptions : currencyOptions
+  })
+
+  return Object.keys(normalizedPricing).length > 0
+    ? normalizedPricing
+    : undefined
+}
+
+function buildPricingPayload(inputs) {
+  if (inputs.pricing) {
+    return normalizePricing(inputs.pricing, inputs.currencyOptions)
+  }
+
+  return normalizePricing({
+    currency: inputs.currency,
+    amount: inputs.amount,
+    currencyOptions: inputs.currencyOptions
+  })
 }
 
 function buildPureCheckoutPayload(inputs, adapterConfig = {}) {
@@ -142,5 +170,6 @@ module.exports = {
   buildRefundPayload,
   buildProductCart,
   buildCustomerPayload,
+  normalizePricing,
   withoutUndefined
 }

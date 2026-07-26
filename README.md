@@ -38,7 +38,7 @@ Create a product checkout session with camelCase inputs:
 
 ```js
 const checkoutUrl = await sails.pay.checkout({
-  items: [{ product: 'prod_abc123', quantity: 1 }],
+  items: [{ product: 'prod_abc123' }],
   customer: {
     email: 'customer@example.com',
     name: 'Jane Doe'
@@ -57,6 +57,73 @@ The adapter maps those inputs to Bachs Checkout Sessions internally:
 `items` becomes `product_cart`, `product` becomes `product_id`,
 `returnUrl` becomes `return_url`, and `idempotencyKey` becomes the
 `Idempotency-Key` header.
+
+### Bachs ad-hoc item pricing
+
+Override a catalog product with a fixed price for one checkout using the
+`amount` shorthand:
+
+```js
+const checkoutUrl = await sails.pay.checkout({
+  items: [{ product: 'prod_abc123', amount: '19.00' }]
+})
+```
+
+For pay-what-you-want pricing, provide camel-cased custom bounds. When using
+Bachs' hosted checkout, omit `chosenAmount` and let the buyer select an amount
+on the hosted page:
+
+```js
+const checkoutUrl = await sails.pay.checkout({
+  items: [
+    {
+      product: 'prod_abc123',
+      pricing: {
+        type: 'custom',
+        presetAmount: '10.00',
+        minimumAmount: '5.00',
+        maximumAmount: '100.00'
+      }
+    }
+  ]
+})
+```
+
+When the buyer already selected an amount in your own UI, pass it separately
+as `chosenAmount`:
+
+```js
+const checkoutUrl = await sails.pay.checkout({
+  items: [
+    {
+      product: 'prod_abc123',
+      pricing: {
+        type: 'custom',
+        minimumAmount: '5.00',
+        maximumAmount: '100.00'
+      },
+      chosenAmount: '12.00'
+    }
+  ]
+})
+```
+
+Use `free` pricing when no money should be collected:
+
+```js
+const checkoutUrl = await sails.pay.checkout({
+  items: [
+    {
+      product: 'prod_abc123',
+      pricing: { type: 'free' }
+    }
+  ]
+})
+```
+
+All money values must be decimal strings such as `'19.00'`, never JavaScript
+numbers or minor units. `quantity` is optional and Bachs defaults it to `1`;
+when supplied, it must be an integer of at least `1`.
 
 Look up the returned checkout after redirect or webhook processing:
 
