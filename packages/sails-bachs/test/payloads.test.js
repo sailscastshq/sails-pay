@@ -3,8 +3,146 @@ const assert = require('node:assert/strict')
 const {
   buildCheckoutSessionPayload,
   buildPureCheckoutPayload,
-  buildRefundPayload
+  buildRefundPayload,
+  buildProductCart,
+  normalizePricing
 } = require('../helpers/payloads')
+
+test('buildProductCart preserves catalog pricing and optional quantity', () => {
+  assert.deepEqual(buildProductCart([{ product: 'prod_catalog' }]), [
+    {
+      product_id: 'prod_catalog'
+    }
+  ])
+
+  assert.deepEqual(
+    buildProductCart([{ product: 'prod_quantity', quantity: 2 }]),
+    [
+      {
+        product_id: 'prod_quantity',
+        quantity: 2
+      }
+    ]
+  )
+})
+
+test('buildProductCart normalizes fixed pricing shorthand and explicit pricing', () => {
+  const fixedPricing = {
+    product_id: 'prod_fixed',
+    pricing: {
+      price_type: 'fixed',
+      amount: '19.00'
+    }
+  }
+
+  assert.deepEqual(
+    buildProductCart([{ product: 'prod_fixed', amount: '19.00' }]),
+    [fixedPricing]
+  )
+
+  assert.deepEqual(
+    buildProductCart([
+      {
+        product: 'prod_fixed',
+        pricing: {
+          type: 'fixed',
+          amount: '19.00'
+        }
+      }
+    ]),
+    [fixedPricing]
+  )
+})
+
+test('buildProductCart normalizes custom pricing and chosenAmount', () => {
+  assert.deepEqual(
+    buildProductCart([
+      {
+        product: 'prod_custom',
+        pricing: {
+          type: 'custom',
+          presetAmount: '10.00',
+          minimumAmount: '5.00',
+          maximumAmount: '100.00'
+        },
+        chosenAmount: '12.00'
+      }
+    ]),
+    [
+      {
+        product_id: 'prod_custom',
+        pricing: {
+          price_type: 'custom',
+          preset_amount: '10.00',
+          minimum_amount: '5.00',
+          maximum_amount: '100.00'
+        },
+        amount: '12.00'
+      }
+    ]
+  )
+})
+
+test('buildProductCart normalizes free pricing', () => {
+  assert.deepEqual(
+    buildProductCart([
+      {
+        product: 'prod_free',
+        pricing: {
+          type: 'free'
+        }
+      }
+    ]),
+    [
+      {
+        product_id: 'prod_free',
+        pricing: {
+          price_type: 'free'
+        }
+      }
+    ]
+  )
+})
+
+test('buildProductCart maps catalog chosenAmount to the flat Bachs amount', () => {
+  assert.deepEqual(
+    buildProductCart([
+      {
+        product: 'prod_catalog_custom',
+        chosenAmount: '12.00'
+      }
+    ]),
+    [
+      {
+        product_id: 'prod_catalog_custom',
+        amount: '12.00'
+      }
+    ]
+  )
+})
+
+test('normalizePricing maps reusable pricing fields to Bachs snake case', () => {
+  assert.deepEqual(
+    normalizePricing({
+      type: 'custom',
+      presetAmount: '10.00',
+      minimumAmount: '5.00',
+      maximumAmount: '100.00',
+      currencyOptions: {
+        NGN: '15000.00'
+      }
+    }),
+    {
+      price_type: 'custom',
+      preset_amount: '10.00',
+      minimum_amount: '5.00',
+      maximum_amount: '100.00',
+      currency_options: {
+        NGN: '15000.00'
+      }
+    }
+  )
+})
 
 test('buildCheckoutSessionPayload maps product checkout inputs to Bachs snake case', () => {
   const payload = buildCheckoutSessionPayload(
@@ -37,7 +175,10 @@ test('buildCheckoutSessionPayload maps product checkout inputs to Bachs snake ca
       {
         product_id: 'prod_abc123',
         quantity: 2,
-        amount: '50.00'
+        pricing: {
+          price_type: 'fixed',
+          amount: '50.00'
+        }
       }
     ],
     billing_currency: 'NGN',
@@ -115,6 +256,34 @@ test('buildPureCheckoutPayload maps amount checkout inputs to Bachs snake case',
     },
     expires_in_minutes: 30,
     simulated_outcome: 'success'
+  })
+})
+
+test('buildPureCheckoutPayload reuses advanced pricing normalization', () => {
+  const payload = buildPureCheckoutPayload({
+    pricing: {
+      type: 'custom',
+      currency: 'USD',
+      presetAmount: '10.00',
+      minimumAmount: '5.00',
+      maximumAmount: '100.00'
+    },
+    currencyOptions: {
+      NGN: '15000.00'
+    }
+  })
+
+  assert.deepEqual(payload, {
+    pricing: {
+      currency: 'USD',
+      price_type: 'custom',
+      preset_amount: '10.00',
+      minimum_amount: '5.00',
+      maximum_amount: '100.00',
+      currency_options: {
+        NGN: '15000.00'
+      }
+    }
   })
 })
 
