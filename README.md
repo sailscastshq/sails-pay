@@ -159,6 +159,138 @@ const portalUrl = await sails.pay
 Each call creates a new portal session. The adapter does not cache or persist
 the returned URL.
 
+## Bachs Connect
+
+Use the named Bachs provider when a Sails application needs to onboard and pay
+marketplace sellers, creators, or contractors while another provider remains
+the default for customer payments:
+
+```js
+const bachs = sails.pay.provider('bachs')
+```
+
+Create a recipient-only connected account. The adapter converts the camelCase
+input into Bachs' recipient configuration and requests only the capabilities
+you explicitly enable:
+
+```js
+const account = await bachs.account.create({
+  contactEmail: 'contributor@example.com',
+  displayName: 'Tembo Contributor',
+  country: 'NG',
+  entityType: 'individual',
+  capabilities: {
+    transfers: true,
+    payouts: true
+  }
+})
+
+const onboarding = await bachs.account.link.create({
+  accountId: account.id,
+  type: 'onboarding',
+  refreshUrl: 'https://example.com/connect/refresh',
+  returnUrl: 'https://example.com/connect/return'
+})
+```
+
+After Bachs reports both capabilities as active, move money from the platform
+balance into the connected account:
+
+```js
+const transfer = await bachs.transfer.create({
+  destination: account.id,
+  amount: '1600.00',
+  currency: 'NGN',
+  transferGroup: 'creator-payrun-2026-08',
+  description: 'August creator earnings',
+  idempotencyKey: 'creator-payrun-2026-08-account-42'
+})
+```
+
+Money amounts are decimal strings, not JavaScript numbers or minor units. The
+adapter maps `transferGroup` to `transfer_group` and sends `idempotencyKey` as
+the `Idempotency-Key` header.
+
+Resolve a Nigerian bank account and register it as a destination belonging to
+the connected account:
+
+```js
+const banks = await bachs.payout.bank.list({
+  country: 'NG',
+  currency: 'NGN',
+  accountId: account.id
+})
+
+const selectedBankCode = '058' // Select a code from the provider response.
+
+const resolved = await bachs.payout.bank.resolve({
+  accountNumber: '0123456789',
+  bankCode: selectedBankCode,
+  currency: 'NGN',
+  accountId: account.id
+})
+
+const destination = await bachs.payout.destination.create({
+  type: 'bank_account',
+  currency: 'NGN',
+  name: resolved.account_name,
+  accountNumber: '0123456789',
+  bankCode: selectedBankCode,
+  accountId: account.id,
+  idempotencyKey: 'bank-destination-account-42'
+})
+```
+
+Passing `accountId` makes the adapter act for that connected account using the
+provider header. Application code never needs to construct `X-Account-Id` or
+a Bachs URL itself.
+
+Once the destination is usable, withdraw from the connected account:
+
+```js
+const payout = await bachs.payout.create({
+  destination: destination.id,
+  amount: '1500.00',
+  reference: 'creator-payout-42',
+  metadata: { contributorId: '42' },
+  idempotencyKey: 'creator-payout-42-attempt-1',
+  accountId: account.id
+})
+
+const currentPayout = await bachs.payout.get({
+  payoutId: payout.id,
+  accountId: account.id
+})
+```
+
+The Connect resource API is:
+
+```text
+bachs.account.create()              bachs.account.get()
+bachs.account.link.create()
+bachs.transfer.create()             bachs.transfer.get()
+bachs.balance.get()
+bachs.payout.bank.list()            bachs.payout.bank.resolve()
+bachs.payout.destination.create()   bachs.payout.destination.get()
+bachs.payout.create()               bachs.payout.get()
+bachs.webhooks.verify()
+```
+
+Verify Bachs webhooks against the exact raw request body before applying an
+event:
+
+```js
+await bachs.webhooks.verify({
+  rawBody: req.rawBody,
+  timestamp: req.get('X-Bachs-Timestamp'),
+  signature: req.get('X-Bachs-Signature')
+})
+```
+
+The adapter is intentionally transport-focused. Your application remains the
+source of truth for its own ledger, webhook-event idempotency, payout state,
+authorization, retry policy, and reconciliation records.
+
 ## Contributing
 
 If you're interested in contributing to Sails Pay, please read our [contributing guide](https://github.com/sailscastshq/sails-pay/blob/main/.github/CONTRIBUTING.md).
