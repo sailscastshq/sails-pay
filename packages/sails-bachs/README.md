@@ -103,8 +103,10 @@ const payout = await bachs.payout.create({
 ```
 
 Amounts are decimal strings. The adapter maps camelCase inputs to the Bachs
-payload, adds authentication, `Idempotency-Key`, and `X-Account-Id` headers,
-encodes resource identifiers, and normalizes provider errors. Applications
+payload, adds authentication and idempotency headers, uses
+`X-Connected-Account-ID` for connected-account transfer recovery, and uses
+`X-Account-Id` for account-scoped balances, destinations, and withdrawals. It
+also encodes resource identifiers and normalizes provider errors. Applications
 remain responsible for their ledger, authorization, event idempotency, payout
 state machine, and reconciliation policy.
 

@@ -164,7 +164,7 @@ test('Connect transfers support platform funding and connected-account recovery'
     transfer_group: 'tembo-payout-123',
     description: 'Tembo contributor payout'
   })
-  assert.equal(calls[1].options.headers['X-Account-Id'], 'acct_123')
+  assert.equal(calls[1].options.headers['X-Connected-Account-ID'], 'acct_123')
   assert.equal(
     calls[2].url,
     'https://sandbox-api.bachs.io/v1/transfers/tr%2Funsafe'

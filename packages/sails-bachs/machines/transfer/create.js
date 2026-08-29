@@ -34,7 +34,7 @@ module.exports = require('machine').build({
         baseUrl: inputs.baseUrl || adapterConfig.baseUrl,
         idempotencyKey: inputs.idempotencyKey,
         headers: inputs.accountId
-          ? { 'X-Account-Id': inputs.accountId }
+          ? { 'X-Connected-Account-ID': inputs.accountId }
           : undefined,
         body: {
           destination: inputs.destination,
