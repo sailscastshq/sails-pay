@@ -237,6 +237,27 @@ A provider without Connect throws
 Sails Pay moves the money. Your application owns the ledger, who may withdraw
 from which account, webhook idempotency, and reconciliation.
 
+### Split a checkout with a connected account
+
+When a sale belongs to one connected account, split it at checkout instead of
+transferring later. The account receives the rest of the sale when it settles,
+and the provider records your platform fee:
+
+```js
+const checkoutUrl = await sails.pay.checkout({
+  items: [{ product: 'prod_abc123', amount: '10500.00' }],
+  reference: 'order_42',
+  connect: {
+    destination: 'acct_...',
+    platformFee: '500.00'
+  }
+})
+```
+
+`destination` and `platformFee` are both required, and `platformFee` is a
+positive decimal string. `connect` works on product checkout sessions only.
+With Bachs, it maps to `transfer_data.destination` and `platform_fee`.
+
 ## Contributing
 
 If you're interested in contributing to Sails Pay, please read our [contributing guide](https://github.com/sailscastshq/sails-pay/blob/main/.github/CONTRIBUTING.md).

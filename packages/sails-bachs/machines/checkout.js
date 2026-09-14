@@ -4,6 +4,7 @@ const {
   buildPureCheckoutPayload
 } = require('../helpers/payloads')
 const validateCheckoutItems = require('../helpers/validate-checkout-items')
+const validateCheckoutConnect = require('../helpers/validate-checkout-connect')
 const parameters = require('../helpers/parameters')
 
 module.exports = require('machine').build({
@@ -116,6 +117,11 @@ module.exports = require('machine').build({
     simulatedOutcome: {
       type: 'string',
       description: 'Sandbox-only forced outcome.'
+    },
+    connect: {
+      type: 'ref',
+      description:
+        'Splits a checkout session with a connected account: { destination, platformFee }. The account receives the rest of the sale when it settles.'
     }
   },
   exits: {
@@ -155,6 +161,16 @@ module.exports = require('machine').build({
 
       if (validationError) {
         return exits.invalidRequest(validationError)
+      }
+    }
+
+    if (inputs.connect !== undefined) {
+      const connectError = validateCheckoutConnect(inputs.connect, {
+        isCheckoutSession: shouldUseCheckoutSession
+      })
+
+      if (connectError) {
+        return exits.invalidRequest(connectError)
       }
     }
 

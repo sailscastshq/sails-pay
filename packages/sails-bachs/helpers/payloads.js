@@ -81,7 +81,11 @@ function buildCheckoutSessionPayload(inputs, adapterConfig = {}) {
     return_url: returnUrl,
     cancel_url: inputs.cancelUrl || adapterConfig.cancelUrl,
     reference: inputs.reference,
-    metadata: inputs.metadata || checkoutData.custom
+    metadata: inputs.metadata || checkoutData.custom,
+    transfer_data: inputs.connect && {
+      destination: inputs.connect.destination
+    },
+    platform_fee: inputs.connect && inputs.connect.platformFee
   })
 }
 
