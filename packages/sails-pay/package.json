@@ -1,10 +1,10 @@
 {
   "name": "sails-pay",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "The modern payments engine for Sails applications",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test"
   },
   "homepage": "https://docs.sailcasts.com/pay/",
   "repository": {

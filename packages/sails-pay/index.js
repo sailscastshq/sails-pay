@@ -56,6 +56,25 @@ module.exports = function (sails) {
     }
   }
 
+  /**
+   * `connect` is the uniform Connect API (accounts, transfers, balances,
+   * payouts). Adapters that have not implemented it fail loudly on access
+   * instead of with `undefined is not a function`.
+   */
+  function guardConnect(paymentProvider, providerName) {
+    if ('connect' in paymentProvider) return
+
+    Object.defineProperty(paymentProvider, 'connect', {
+      configurable: true,
+      enumerable: false,
+      get() {
+        throw new Error(
+          `The "${providerName}" provider does not support Connect yet.`
+        )
+      }
+    })
+  }
+
   return {
     defaults: {
       pay: {
@@ -84,6 +103,7 @@ module.exports = function (sails) {
             const paymentProvider = require(providerConfig.adapter)
             // Merge env defaults with config (config takes precedence)
             paymentProvider.config = { ...envDefaults, ...providerConfig }
+            guardConnect(paymentProvider, providerName)
             return paymentProvider
           default:
             throw new Error(
