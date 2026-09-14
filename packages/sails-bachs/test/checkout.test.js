@@ -363,3 +363,159 @@ test('adapter exposes checkout.get as the uniform checkout lookup API', async ()
   )
   assert.equal(calls[0].options.method, 'GET')
 })
+
+test('checkout splits a checkout session with a connected account', async () => {
+  const calls = []
+
+  fetch.setFetchImplementation(async (url, options) => {
+    calls.push({ url, options })
+
+    return {
+      ok: true,
+      status: 201,
+      statusText: 'Created',
+      text: async () =>
+        JSON.stringify({
+          checkout_id: 'chk_split',
+          checkout_url: 'https://pay.bachs.io/c/split'
+        })
+    }
+  })
+
+  const checkoutUrl = await checkout({
+    apiKey: 'sk_sandbox_123',
+    items: [{ product: 'prod_abc123', amount: '10500.00' }],
+    reference: 'sponsorship_1',
+    connect: {
+      destination: 'acct_123',
+      platformFee: '500.00'
+    }
+  })
+
+  assert.equal(checkoutUrl, 'https://pay.bachs.io/c/split')
+  assert.equal(
+    calls[0].url,
+    'https://sandbox-api.bachs.io/v1/checkout-sessions'
+  )
+  assert.equal(calls[0].options.headers['X-Account-Id'], undefined)
+
+  const body = JSON.parse(calls[0].options.body)
+  assert.deepEqual(body.transfer_data, { destination: 'acct_123' })
+  assert.equal(body.platform_fee, '500.00')
+  assert.equal(body.connect, undefined)
+})
+
+test('checkout without connect sends no split fields', async () => {
+  const calls = []
+
+  fetch.setFetchImplementation(async (url, options) => {
+    calls.push({ url, options })
+
+    return {
+      ok: true,
+      status: 201,
+      statusText: 'Created',
+      text: async () =>
+        JSON.stringify({ checkout_url: 'https://pay.bachs.io/c/plain' })
+    }
+  })
+
+  await checkout({
+    apiKey: 'sk_sandbox_123',
+    items: [{ product: 'prod_abc123' }]
+  })
+
+  const body = JSON.parse(calls[0].options.body)
+  assert.equal('transfer_data' in body, false)
+  assert.equal('platform_fee' in body, false)
+})
+
+const invalidConnectCases = [
+  {
+    name: 'connect that is not an object',
+    inputs: { items: [{ product: 'prod_abc123' }], connect: 'acct_123' },
+    field: 'connect',
+    message: /must be an object/
+  },
+  {
+    name: 'connect on a pure checkout',
+    inputs: {
+      amount: '10500.00',
+      currency: 'NGN',
+      connect: { destination: 'acct_123', platformFee: '500.00' }
+    },
+    field: 'connect',
+    message: /only supported on product checkout sessions/
+  },
+  {
+    name: 'connect without a destination',
+    inputs: {
+      items: [{ product: 'prod_abc123' }],
+      connect: { platformFee: '500.00' }
+    },
+    field: 'connect.destination',
+    message: /connected account ID/
+  },
+  {
+    name: 'connect without a platform fee',
+    inputs: {
+      items: [{ product: 'prod_abc123' }],
+      connect: { destination: 'acct_123' }
+    },
+    field: 'connect.platformFee',
+    message: /positive decimal string/
+  },
+  {
+    name: 'a numeric platform fee',
+    inputs: {
+      items: [{ product: 'prod_abc123' }],
+      connect: { destination: 'acct_123', platformFee: 500 }
+    },
+    field: 'connect.platformFee',
+    message: /positive decimal string/
+  },
+  {
+    name: 'a zero platform fee',
+    inputs: {
+      items: [{ product: 'prod_abc123' }],
+      connect: { destination: 'acct_123', platformFee: '0.00' }
+    },
+    field: 'connect.platformFee',
+    message: /positive decimal string/
+  },
+  {
+    name: 'an unknown connect field',
+    inputs: {
+      items: [{ product: 'prod_abc123' }],
+      connect: {
+        destination: 'acct_123',
+        platformFee: '500.00',
+        amount: '10000.00'
+      }
+    },
+    field: 'connect.amount',
+    message: /is not supported/
+  }
+]
+
+for (const invalidCase of invalidConnectCases) {
+  test(`checkout rejects ${invalidCase.name} before calling Bachs`, async () => {
+    let fetchCalls = 0
+
+    fetch.setFetchImplementation(async () => {
+      fetchCalls += 1
+    })
+
+    await assert.rejects(
+      () => checkout({ apiKey: 'sk_sandbox_123', ...invalidCase.inputs }),
+      (error) => {
+        assert.equal(error.exit, 'invalidRequest')
+        assert.equal(error.raw.field, invalidCase.field)
+        assert.match(error.raw.message, invalidCase.message)
+        return true
+      }
+    )
+
+    assert.equal(fetchCalls, 0)
+  })
+}
