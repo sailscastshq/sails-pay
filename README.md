@@ -159,6 +159,84 @@ const portalUrl = await sails.pay
 Each call creates a new portal session. The adapter does not cache or persist
 the returned URL.
 
+## Connect
+
+`sails.pay.connect` is for platforms that hold money for other people:
+creators, maintainers, contractors, sellers. Each person gets a connected
+account with a balance of its own. You collect payments with
+`sails.pay.checkout`, transfer each person's share into their balance, and they
+withdraw to their bank.
+
+The API is the same for every provider that supports Connect. Bachs supports it
+today.
+
+Give someone a balance and send them through hosted onboarding:
+
+```js
+const account = await sails.pay.connect.account.create({
+  email: 'ada@example.com',
+  name: 'Ada Obi',
+  country: 'NG',
+  capabilities: ['transfers', 'payouts'],
+  idempotencyKey: `maintainer-${maintainer.id}`
+})
+
+const { url } = await sails.pay.connect.account.link({
+  account: account.id,
+  type: 'onboarding',
+  returnUrl: 'https://example.com/payouts/return',
+  refreshUrl: 'https://example.com/payouts/refresh'
+})
+```
+
+Check whether they can get paid:
+
+```js
+const account = await sails.pay.connect.account.get({ account: 'acct_...' })
+
+account.capabilities.payouts // 'active' | 'pending' | 'inactive'
+account.requirements // still due, e.g. ['payout_destination']
+```
+
+Transfer from your platform balance into theirs, then read their balance:
+
+```js
+await sails.pay.connect.transfer.create({
+  account: 'acct_...',
+  amount: '10000.00',
+  currency: 'NGN',
+  group: 'payrun-2026-09',
+  idempotencyKey: 'payrun-2026-09-acct_...'
+})
+
+const balances = await sails.pay.connect.balance.get({ account: 'acct_...' })
+// [{ currency: 'NGN', available: '10000.00', pending: '0.00' }]
+```
+
+Withdraw to their default destination for the currency, or pass `destination`:
+
+```js
+const payout = await sails.pay.connect.payout.create({
+  account: 'acct_...',
+  amount: '9000.00',
+  currency: 'NGN',
+  reference: 'withdrawal-42',
+  idempotencyKey: 'withdrawal-42'
+})
+// { id, account, amount, currency, fee, destination, status: 'pending', raw }
+```
+
+Every method returns the same shape for every provider, with the provider's
+untouched response on `raw`. Amounts are decimal strings. The account is always
+passed as `account`, so application code never sets provider headers.
+
+A provider without Connect throws
+`The "<provider>" provider does not support Connect yet.` when you touch
+`sails.pay.connect`.
+
+Sails Pay moves the money. Your application owns the ledger, who may withdraw
+from which account, webhook idempotency, and reconciliation.
+
 ## Contributing
 
 If you're interested in contributing to Sails Pay, please read our [contributing guide](https://github.com/sailscastshq/sails-pay/blob/main/.github/CONTRIBUTING.md).
