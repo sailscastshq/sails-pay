@@ -65,6 +65,7 @@ function buildProductCart(items) {
 function buildCheckoutSessionPayload(inputs, adapterConfig = {}) {
   const productCollectionId =
     inputs.productCollectionId || inputs.productCollection
+  const productCart = buildProductCart(inputs.items)
   const checkoutData = inputs.checkoutData || {}
   const returnUrl =
     inputs.returnUrl ||
@@ -74,8 +75,13 @@ function buildCheckoutSessionPayload(inputs, adapterConfig = {}) {
 
   return withoutUndefined({
     customer: buildCustomerPayload(inputs),
-    product_cart: buildProductCart(inputs.items),
+    product_cart: productCart,
     product_collection_id: productCollectionId,
+    // A session prices itself with products or with a raw amount, never both.
+    pricing:
+      productCart || productCollectionId
+        ? undefined
+        : buildPricingPayload(inputs),
     billing_currency: inputs.billingCurrency,
     allowed_payment_method_types: inputs.allowedPaymentMethodTypes,
     return_url: returnUrl,
