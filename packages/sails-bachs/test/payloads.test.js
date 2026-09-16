@@ -2,7 +2,6 @@ const test = require('node:test')
 const assert = require('node:assert/strict')
 const {
   buildCheckoutSessionPayload,
-  buildPureCheckoutPayload,
   buildRefundPayload,
   buildProductCart,
   normalizePricing
@@ -213,77 +212,6 @@ test('buildCheckoutSessionPayload maps productCollectionId and configured return
     product_collection_id: 'pgrp_123',
     return_url: 'https://example.com/after',
     cancel_url: 'https://example.com/cancel'
-  })
-})
-
-test('buildPureCheckoutPayload maps amount checkout inputs to Bachs snake case', () => {
-  const payload = buildPureCheckoutPayload(
-    {
-      amount: '50.00',
-      currency: 'USD',
-      currencyOptions: {
-        NGN: '75000.00'
-      },
-      email: 'customer@example.com',
-      name: 'Jane Doe',
-      successUrl: 'https://example.com/success',
-      cancelUrl: 'https://example.com/cancel',
-      reference: 'order_9876',
-      metadata: {
-        orderId: '9876'
-      },
-      expiresInMinutes: 30,
-      simulatedOutcome: 'success'
-    },
-    {}
-  )
-
-  assert.deepEqual(payload, {
-    pricing: {
-      currency: 'USD',
-      amount: '50.00',
-      currency_options: {
-        NGN: '75000.00'
-      }
-    },
-    customer_email: 'customer@example.com',
-    customer_name: 'Jane Doe',
-    success_url: 'https://example.com/success',
-    cancel_url: 'https://example.com/cancel',
-    reference: 'order_9876',
-    metadata: {
-      orderId: '9876'
-    },
-    expires_in_minutes: 30,
-    simulated_outcome: 'success'
-  })
-})
-
-test('buildPureCheckoutPayload reuses advanced pricing normalization', () => {
-  const payload = buildPureCheckoutPayload({
-    pricing: {
-      type: 'custom',
-      currency: 'USD',
-      presetAmount: '10.00',
-      minimumAmount: '5.00',
-      maximumAmount: '100.00'
-    },
-    currencyOptions: {
-      NGN: '15000.00'
-    }
-  })
-
-  assert.deepEqual(payload, {
-    pricing: {
-      currency: 'USD',
-      price_type: 'custom',
-      preset_amount: '10.00',
-      minimum_amount: '5.00',
-      maximum_amount: '100.00',
-      currency_options: {
-        NGN: '15000.00'
-      }
-    }
   })
 })
 

@@ -88,6 +88,7 @@ function buildCheckoutSessionPayload(inputs, adapterConfig = {}) {
     cancel_url: inputs.cancelUrl || adapterConfig.cancelUrl,
     reference: inputs.reference,
     metadata: inputs.metadata || checkoutData.custom,
+    expires_in_minutes: inputs.expiresInMinutes,
     transfer_data: inputs.connect && {
       destination: inputs.connect.destination
     },
@@ -135,32 +136,6 @@ function buildPricingPayload(inputs) {
   })
 }
 
-function buildPureCheckoutPayload(inputs, adapterConfig = {}) {
-  const checkoutData = inputs.checkoutData || {}
-  const customer = inputs.customer || {}
-
-  return withoutUndefined({
-    pricing: buildPricingPayload(inputs),
-    customer_email:
-      inputs.customerEmail ||
-      inputs.email ||
-      customer.email ||
-      checkoutData.email,
-    customer_name:
-      inputs.customerName || inputs.name || customer.name || checkoutData.name,
-    success_url:
-      inputs.successUrl ||
-      inputs.returnUrl ||
-      adapterConfig.successUrl ||
-      adapterConfig.returnUrl,
-    cancel_url: inputs.cancelUrl || adapterConfig.cancelUrl,
-    reference: inputs.reference,
-    metadata: inputs.metadata || checkoutData.custom,
-    expires_in_minutes: inputs.expiresInMinutes,
-    simulated_outcome: inputs.simulatedOutcome
-  })
-}
-
 function buildRefundPayload(inputs) {
   return withoutUndefined({
     charge_id: inputs.chargeId,
@@ -176,7 +151,6 @@ function buildRefundPayload(inputs) {
 
 module.exports = {
   buildCheckoutSessionPayload,
-  buildPureCheckoutPayload,
   buildRefundPayload,
   buildProductCart,
   buildCustomerPayload,
