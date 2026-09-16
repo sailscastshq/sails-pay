@@ -405,6 +405,70 @@ test('checkout splits a checkout session with a connected account', async () => 
   assert.equal(body.connect, undefined)
 })
 
+test('checkout splits a product-less checkout session', async () => {
+  const calls = []
+
+  fetch.setFetchImplementation(async (url, options) => {
+    calls.push({ url, options })
+
+    return {
+      ok: true,
+      status: 201,
+      statusText: 'Created',
+      text: async () =>
+        JSON.stringify({ checkout_url: 'https://pay.bachs.io/c/raw-split' })
+    }
+  })
+
+  const checkoutUrl = await checkout({
+    apiKey: 'sk_sandbox_123',
+    amount: '10500.00',
+    currency: 'NGN',
+    billingCurrency: 'NGN',
+    customer: { email: 'sponsor@example.com' },
+    reference: 'sponsorship_2',
+    connect: { destination: 'acct_123', platformFee: '500.00' }
+  })
+
+  assert.equal(checkoutUrl, 'https://pay.bachs.io/c/raw-split')
+  assert.equal(
+    calls[0].url,
+    'https://sandbox-api.bachs.io/v1/checkout-sessions'
+  )
+
+  const body = JSON.parse(calls[0].options.body)
+  assert.deepEqual(body.pricing, { currency: 'NGN', amount: '10500.00' })
+  assert.deepEqual(body.transfer_data, { destination: 'acct_123' })
+  assert.equal(body.platform_fee, '500.00')
+  assert.equal(body.billing_currency, 'NGN')
+  assert.equal('product_cart' in body, false)
+})
+
+test('a pure checkout without connect still posts to /checkouts', async () => {
+  const calls = []
+
+  fetch.setFetchImplementation(async (url, options) => {
+    calls.push({ url, options })
+
+    return {
+      ok: true,
+      status: 201,
+      statusText: 'Created',
+      text: async () =>
+        JSON.stringify({ checkout_url: 'https://pay.bachs.io/c/raw' })
+    }
+  })
+
+  await checkout({
+    apiKey: 'sk_sandbox_123',
+    amount: '10500.00',
+    currency: 'NGN',
+    customer: { email: 'sponsor@example.com' }
+  })
+
+  assert.equal(calls[0].url, 'https://sandbox-api.bachs.io/v1/checkouts')
+})
+
 test('checkout without connect sends no split fields', async () => {
   const calls = []
 
@@ -436,16 +500,6 @@ const invalidConnectCases = [
     inputs: { items: [{ product: 'prod_abc123' }], connect: 'acct_123' },
     field: 'connect',
     message: /must be an object/
-  },
-  {
-    name: 'connect on a pure checkout',
-    inputs: {
-      amount: '10500.00',
-      currency: 'NGN',
-      connect: { destination: 'acct_123', platformFee: '500.00' }
-    },
-    field: 'connect',
-    message: /only supported on product checkout sessions/
   },
   {
     name: 'connect without a destination',

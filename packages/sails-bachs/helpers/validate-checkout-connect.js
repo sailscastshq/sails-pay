@@ -20,7 +20,7 @@ function validateCheckoutConnect(connect, { isCheckoutSession }) {
   if (!isCheckoutSession) {
     return invalid(
       'connect',
-      'is only supported on product checkout sessions (items or productCollectionId).'
+      'is only supported on checkout sessions (items, productCollectionId, or pricing).'
     )
   }
 

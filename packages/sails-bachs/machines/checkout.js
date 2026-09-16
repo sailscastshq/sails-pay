@@ -147,9 +147,18 @@ module.exports = require('machine').build({
     const hasProductCollection = Boolean(
       inputs.productCollectionId || inputs.productCollection
     )
-    const shouldUseCheckoutSession = hasItems || hasProductCollection
+    const hasPricing = Boolean(
+      inputs.pricing || inputs.amount !== undefined || inputs.currency
+    )
+    // A split belongs to the platform, and Bachs only splits checkout
+    // sessions. A session takes products or a raw price, so a checkout that
+    // states its own amount and currency can be split too.
+    const shouldUseCheckoutSession =
+      hasItems ||
+      hasProductCollection ||
+      (hasPricing && inputs.connect !== undefined)
 
-    if (shouldUseCheckoutSession && hasItems === hasProductCollection) {
+    if (hasItems && hasProductCollection) {
       return exits.invalidRequest({
         message:
           'Provide exactly one of items or productCollectionId for a Bachs checkout session.'
@@ -179,7 +188,11 @@ module.exports = require('machine').build({
       ? buildCheckoutSessionPayload(inputs, adapterConfig)
       : buildPureCheckoutPayload(inputs, adapterConfig)
 
-    if (!shouldUseCheckoutSession && !payload.pricing) {
+    if (
+      !payload.product_cart &&
+      !payload.product_collection_id &&
+      !payload.pricing
+    ) {
       return exits.invalidRequest({
         message:
           'Provide product items/productCollectionId or pure checkout pricing.'
