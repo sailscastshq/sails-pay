@@ -1,6 +1,6 @@
 {
   "name": "@sails-pay/bachs",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Bachs adapter for Sails Pay",
   "main": "adapter.js",
   "scripts": {

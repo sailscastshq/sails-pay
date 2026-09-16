@@ -37,7 +37,8 @@ module.exports = {
   BACHS_SUCCESS_URL: {
     type: 'string',
     friendlyName: 'Success URL',
-    description: 'Default URL Bachs redirects to after pure checkout payment.'
+    description:
+      'Default URL Bachs redirects to after payment. Alias for returnUrl.'
   },
   BACHS_CANCEL_URL: {
     type: 'string',

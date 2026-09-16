@@ -1,8 +1,5 @@
 const fetch = require('../helpers/fetch')
-const {
-  buildCheckoutSessionPayload,
-  buildPureCheckoutPayload
-} = require('../helpers/payloads')
+const { buildCheckoutSessionPayload } = require('../helpers/payloads')
 const validateCheckoutItems = require('../helpers/validate-checkout-items')
 const validateCheckoutConnect = require('../helpers/validate-checkout-connect')
 const parameters = require('../helpers/parameters')
@@ -46,8 +43,7 @@ module.exports = require('machine').build({
     },
     successUrl: {
       type: 'string',
-      description:
-        'URL Bachs redirects to after a pure checkout payment. Maps to success_url.'
+      description: 'Alias for returnUrl.'
     },
     cancelUrl: parameters.BACHS_CANCEL_URL,
     customer: {
@@ -96,23 +92,27 @@ module.exports = require('machine').build({
     },
     pricing: {
       type: 'ref',
-      description: 'Pure Checkout pricing object.'
+      description:
+        'Pricing for a checkout that sets its own price, instead of products.'
     },
     amount: {
       type: 'string',
-      description: 'Pure Checkout amount, e.g. "50.00".'
+      description:
+        'Amount for a checkout that sets its own price, e.g. "50.00".'
     },
     currency: {
       type: 'string',
-      description: 'Pure Checkout currency, e.g. "USD" or "NGN".'
+      description:
+        'Currency for a checkout that sets its own price, e.g. "USD" or "NGN".'
     },
     currencyOptions: {
       type: 'ref',
-      description: 'Pure Checkout per-currency amount overrides.'
+      description:
+        'Per-currency amount overrides for a checkout that sets its own price.'
     },
     expiresInMinutes: {
       type: 'number',
-      description: 'Pure Checkout expiry in minutes.'
+      description: 'Checkout expiry in minutes.'
     },
     simulatedOutcome: {
       type: 'string',
@@ -150,13 +150,12 @@ module.exports = require('machine').build({
     const hasPricing = Boolean(
       inputs.pricing || inputs.amount !== undefined || inputs.currency
     )
-    // A split belongs to the platform, and Bachs only splits checkout
-    // sessions. A session takes products or a raw price, so a checkout that
-    // states its own amount and currency can be split too.
+    // Bachs checks out through sessions. A session takes products or a raw
+    // price, and it permits a split rather than requiring one, so a checkout
+    // that states its own amount and currency belongs here whether or not it
+    // pays a connected account.
     const shouldUseCheckoutSession =
-      hasItems ||
-      hasProductCollection ||
-      (hasPricing && inputs.connect !== undefined)
+      hasItems || hasProductCollection || hasPricing
 
     if (hasItems && hasProductCollection) {
       return exits.invalidRequest({
@@ -183,10 +182,7 @@ module.exports = require('machine').build({
       }
     }
 
-    const path = shouldUseCheckoutSession ? '/checkout-sessions' : '/checkouts'
-    const payload = shouldUseCheckoutSession
-      ? buildCheckoutSessionPayload(inputs, adapterConfig)
-      : buildPureCheckoutPayload(inputs, adapterConfig)
+    const payload = buildCheckoutSessionPayload(inputs, adapterConfig)
 
     if (
       !payload.product_cart &&
@@ -195,12 +191,12 @@ module.exports = require('machine').build({
     ) {
       return exits.invalidRequest({
         message:
-          'Provide product items/productCollectionId or pure checkout pricing.'
+          'Provide items, productCollectionId, or pricing for a Bachs checkout.'
       })
     }
 
     try {
-      const checkout = await fetch(path, {
+      const checkout = await fetch('/checkout-sessions', {
         method: 'POST',
         apiKey: inputs.apiKey || adapterConfig.apiKey,
         baseUrl: inputs.baseUrl || adapterConfig.baseUrl,

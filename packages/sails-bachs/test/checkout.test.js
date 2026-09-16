@@ -112,7 +112,7 @@ test('checkout sends custom pricing and the buyer-selected amount', async () => 
   })
 })
 
-test('checkout preserves pure checkout behavior', async () => {
+test('checkout prices itself with amount and currency', async () => {
   const calls = []
 
   fetch.setFetchImplementation(async (url, options) => {
@@ -137,9 +137,13 @@ test('checkout preserves pure checkout behavior', async () => {
   })
 
   assert.equal(checkoutUrl, 'https://pay.bachs.io/c/pure')
-  assert.equal(calls[0].url, 'https://sandbox-api.bachs.io/v1/checkouts')
+  assert.equal(
+    calls[0].url,
+    'https://sandbox-api.bachs.io/v1/checkout-sessions'
+  )
   assert.equal(calls[0].options.headers['Idempotency-Key'], 'pure_123')
   assert.deepEqual(JSON.parse(calls[0].options.body), {
+    customer: {},
     pricing: {
       currency: 'USD',
       amount: '42.00'
@@ -444,7 +448,7 @@ test('checkout splits a product-less checkout session', async () => {
   assert.equal('product_cart' in body, false)
 })
 
-test('a pure checkout without connect still posts to /checkouts', async () => {
+test('a self-priced checkout without connect still uses a checkout session', async () => {
   const calls = []
 
   fetch.setFetchImplementation(async (url, options) => {
@@ -466,7 +470,10 @@ test('a pure checkout without connect still posts to /checkouts', async () => {
     customer: { email: 'sponsor@example.com' }
   })
 
-  assert.equal(calls[0].url, 'https://sandbox-api.bachs.io/v1/checkouts')
+  assert.equal(
+    calls[0].url,
+    'https://sandbox-api.bachs.io/v1/checkout-sessions'
+  )
 })
 
 test('checkout without connect sends no split fields', async () => {
