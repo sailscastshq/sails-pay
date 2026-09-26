@@ -27,7 +27,7 @@ function buildCustomerPayload(inputs) {
     })
   }
 
-  return withoutUndefined({
+  const details = withoutUndefined({
     email:
       customer.email ||
       inputs.customerEmail ||
@@ -37,6 +37,9 @@ function buildCustomerPayload(inputs) {
       customer.name || inputs.customerName || inputs.name || checkoutData.name,
     phone_number: customer.phoneNumber || inputs.phoneNumber
   })
+
+  // Omit an absent identity so hosted checkout can collect guest details.
+  return Object.keys(details).length ? details : undefined
 }
 
 function buildProductCart(items) {

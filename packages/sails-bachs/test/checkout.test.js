@@ -96,7 +96,6 @@ test('checkout sends custom pricing and the buyer-selected amount', async () => 
 
   assert.equal(checkoutUrl, 'https://pay.bachs.io/c/custom')
   assert.deepEqual(JSON.parse(calls[0].options.body), {
-    customer: {},
     product_cart: [
       {
         product_id: 'prod_custom',
@@ -143,7 +142,6 @@ test('checkout prices itself with amount and currency', async () => {
   )
   assert.equal(calls[0].options.headers['Idempotency-Key'], 'pure_123')
   assert.deepEqual(JSON.parse(calls[0].options.body), {
-    customer: {},
     pricing: {
       currency: 'USD',
       amount: '42.00'
@@ -578,5 +576,29 @@ for (const invalidCase of invalidConnectCases) {
     )
 
     assert.equal(fetchCalls, 0)
+  })
+}
+
+for (const customer of [undefined, null, {}]) {
+  test(`guest checkout omits an empty customer (${JSON.stringify(
+    customer
+  )})`, async () => {
+    let payload
+    fetch.setFetchImplementation(async (url, options) => {
+      payload = JSON.parse(options.body)
+      return {
+        ok: true,
+        text: async () =>
+          JSON.stringify({ checkout_url: 'https://pay.bachs.io/c/guest' })
+      }
+    })
+    await checkout({
+      apiKey: 'sk_sandbox_test',
+      amount: '10.00',
+      currency: 'USD',
+      customer
+    })
+    assert.equal(Object.hasOwn(payload, 'customer'), false)
+    assert.equal(Object.hasOwn(payload, 'customer_creation'), false)
   })
 }

@@ -58,6 +58,14 @@ The adapter maps those inputs to Bachs Checkout Sessions internally:
 `returnUrl` becomes `return_url`, and `idempotencyKey` becomes the
 `Idempotency-Key` header.
 
+### Guest checkout
+
+For a one-time hosted checkout, omit `customer` to let Bachs collect the buyer's email and name on its checkout page. The adapter omits empty customer details from the request. Bachs' default guest flow returns the payer under `customer_details` while `customer` remains `null`; handle that field in your payment webhooks. Supplying real customer details continues to work as before.
+
+Guest payment details do not verify an app account or establish ownership of a product. Recurring checkout still requires the customer identity expected by Bachs.
+
+See [Bachs guest checkout](https://docs.bachs.io/guides/checkout/checkout-sessions#guest-checkout).
+
 ### Bachs ad-hoc item pricing
 
 Override a catalog product with a fixed price for one checkout using the
