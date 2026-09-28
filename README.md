@@ -231,8 +231,37 @@ const payout = await sails.pay.connect.payout.create({
   reference: 'withdrawal-42',
   idempotencyKey: 'withdrawal-42'
 })
-// { id, account, amount, currency, fee, destination, status: 'pending', raw }
+// { id, account, amount, currency, sourceCurrency, fee, totalDebited,
+//   destination, status: 'pending', raw }
 ```
+
+For a cross-currency payout, quote the amount in the balance currency first.
+Then create the payout with its quote ID instead of an amount. The `currency`
+used to find a default destination is the currency it receives:
+
+```js
+const quote = await sails.pay.connect.payout.quote({
+  account: 'acct_...',
+  fromCurrency: 'USD',
+  toCurrency: 'NGN',
+  amount: '25.00'
+})
+// { id, fromCurrency, toCurrency, fromAmount, toAmount, exchangeRate,
+//   expiresAt, raw }
+
+const payout = await sails.pay.connect.payout.create({
+  account: 'acct_...',
+  currency: 'NGN',
+  quoteId: quote.id,
+  reference: 'withdrawal-usd-42',
+  idempotencyKey: 'withdrawal-usd-42'
+})
+```
+
+Submit while the quote is valid and handle an expired quote by requesting a new
+one. `toAmount` is Bachs' quoted destination amount; confirm the total source
+balance debit from the created payout's `totalDebited`. Bachs' quote docs conflict
+on fee treatment, so do not compute a withdrawal limit from an assumed fee.
 
 Every method returns the same shape for every provider, with the provider's
 untouched response on `raw`. Amounts are decimal strings. The account is always

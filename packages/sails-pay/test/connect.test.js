@@ -24,6 +24,7 @@ test('sails.pay.connect is the default provider Connect API', async () => {
   assert.equal(typeof sails.pay.connect.transfer.create, 'function')
   assert.equal(typeof sails.pay.connect.balance.get, 'function')
   assert.equal(typeof sails.pay.connect.payout.create, 'function')
+  assert.equal(typeof sails.pay.connect.payout.quote, 'function')
 })
 
 test('named providers expose the same Connect API', async () => {

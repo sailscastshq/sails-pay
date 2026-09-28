@@ -17,7 +17,8 @@ module.exports = {
       get: require('./connect/balance/get')
     },
     payout: {
-      create: require('./connect/payout/create')
+      create: require('./connect/payout/create'),
+      quote: require('./connect/payout/quote')
     }
   },
   customer: {

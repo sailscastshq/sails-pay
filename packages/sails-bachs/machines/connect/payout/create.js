@@ -17,8 +17,13 @@ module.exports = require('machine').build({
     },
     amount: {
       type: 'string',
-      required: true,
-      description: 'Decimal amount the destination should receive.'
+      description:
+        'Decimal amount the destination should receive for a same-currency payout.'
+    },
+    quoteId: {
+      type: 'string',
+      description:
+        'Quote ID for a cross-currency payout, used instead of amount.'
     },
     currency: {
       type: 'string',
@@ -58,6 +63,12 @@ module.exports = require('machine').build({
     }
   },
   fn: async function (inputs, exits) {
+    if (Boolean(inputs.amount) === Boolean(inputs.quoteId)) {
+      return exits.couldNotCreatePayout({
+        message: 'Pass exactly one of amount or quoteId.'
+      })
+    }
+
     const adapterConfig = require('../../../adapter').config
     const request = {
       apiKey: inputs.apiKey || adapterConfig.apiKey,
@@ -101,7 +112,9 @@ module.exports = require('machine').build({
         idempotencyKey: inputs.idempotencyKey || inputs.reference,
         body: {
           destination,
-          amount: inputs.amount,
+          ...(inputs.quoteId
+            ? { quote_id: inputs.quoteId }
+            : { amount: inputs.amount }),
           ...(inputs.reference && { reference: inputs.reference })
         }
       })

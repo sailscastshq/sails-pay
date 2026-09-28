@@ -41,7 +41,10 @@ test('adapter exposes exactly the Connect surface', () => {
   ])
   assert.deepEqual(Object.keys(adapter.connect.transfer), ['create'])
   assert.deepEqual(Object.keys(adapter.connect.balance), ['get'])
-  assert.deepEqual(Object.keys(adapter.connect.payout), ['create'])
+  assert.deepEqual(Object.keys(adapter.connect.payout).sort(), [
+    'create',
+    'quote'
+  ])
 })
 
 test('connect.account.create requests a recipient account and normalizes it', async () => {
@@ -239,6 +242,77 @@ test('connect.balance.get acts as the account and returns one entry per currency
   ])
 })
 
+test('connect.payout.quote scopes the quote to the account and normalizes both currencies', async () => {
+  const calls = recordCalls([
+    {
+      status: 201,
+      body: {
+        quote_id: 'pqt_123',
+        from_currency: 'USD',
+        to_currency: 'NGN',
+        from_amount: '25.00',
+        to_amount: '37125.00',
+        exchange_rate: '1500.00',
+        expires_at: '2026-09-28T12:31:00Z'
+      }
+    }
+  ])
+
+  const quote = await adapter.connect.payout.quote({
+    apiKey: 'sk_sandbox_123',
+    account: 'acct_123',
+    fromCurrency: 'USD',
+    toCurrency: 'NGN',
+    amount: '25.00'
+  })
+
+  assert.equal(calls[0].url, 'https://sandbox-api.bachs.io/v1/payouts/quotes')
+  assert.equal(calls[0].options.headers['X-Account-Id'], 'acct_123')
+  assert.deepEqual(JSON.parse(calls[0].options.body), {
+    from_currency: 'USD',
+    to_currency: 'NGN',
+    amount: '25.00'
+  })
+  assert.deepEqual(
+    { ...quote, raw: undefined },
+    {
+      id: 'pqt_123',
+      fromCurrency: 'USD',
+      toCurrency: 'NGN',
+      fromAmount: '25.00',
+      toAmount: '37125.00',
+      exchangeRate: '1500.00',
+      expiresAt: '2026-09-28T12:31:00Z',
+      raw: undefined
+    }
+  )
+})
+
+test('connect.payout.quote exposes Bachs quote errors', async () => {
+  recordCalls([
+    {
+      status: 400,
+      body: {
+        error_code: 'VALIDATION_ERROR',
+        detail: 'Unsupported currency pair'
+      }
+    }
+  ])
+
+  await assert.rejects(
+    adapter.connect.payout.quote({
+      apiKey: 'sk_sandbox_123',
+      account: 'acct_123',
+      fromCurrency: 'USD',
+      toCurrency: 'NGN',
+      amount: '25.00'
+    }),
+    (error) =>
+      error.exit === 'couldNotCreateQuote' &&
+      error.raw.code === 'VALIDATION_ERROR'
+  )
+})
+
 test('connect.payout.create resolves the default destination for the currency', async () => {
   const calls = recordCalls([
     {
@@ -298,12 +372,82 @@ test('connect.payout.create resolves the default destination for the currency', 
       account: 'acct_123',
       amount: '9000.00',
       currency: 'NGN',
+      sourceCurrency: 'NGN',
       fee: '50.00',
+      totalDebited: '9050.00',
       destination: 'pd_default',
       status: 'pending',
       raw: undefined
     }
   )
+})
+
+test('connect.payout.create uses a quote and the NGN default destination without an amount', async () => {
+  const calls = recordCalls([
+    {
+      body: {
+        destinations: [
+          { id: 'pd_ngn', is_usable: true, is_default: true },
+          { id: 'pd_review', is_usable: false }
+        ]
+      }
+    },
+    {
+      status: 201,
+      body: {
+        id: 'pay_usd_ngn',
+        status: 'processing',
+        amount: '37125.00',
+        currency: 'NGN',
+        source_currency: 'USD',
+        fee: '1.00',
+        total_debited: '25.00',
+        destination: 'pd_ngn'
+      }
+    }
+  ])
+
+  const payout = await adapter.connect.payout.create({
+    apiKey: 'sk_sandbox_123',
+    account: 'acct_123',
+    currency: 'NGN',
+    quoteId: 'pqt_123',
+    reference: 'withdrawal-usd-1',
+    idempotencyKey: 'withdrawal-usd-1'
+  })
+
+  assert.equal(
+    calls[0].url,
+    'https://sandbox-api.bachs.io/v1/payouts/destinations?currency=NGN'
+  )
+  assert.deepEqual(JSON.parse(calls[1].options.body), {
+    destination: 'pd_ngn',
+    quote_id: 'pqt_123',
+    reference: 'withdrawal-usd-1'
+  })
+  assert.equal(payout.amount, '37125.00')
+  assert.equal(payout.currency, 'NGN')
+  assert.equal(payout.sourceCurrency, 'USD')
+  assert.equal(payout.fee, '1.00')
+  assert.equal(payout.totalDebited, '25.00')
+})
+
+test('connect.payout.create rejects amount plus quote before calling Bachs', async () => {
+  const calls = recordCalls([])
+
+  await assert.rejects(
+    adapter.connect.payout.create({
+      apiKey: 'sk_sandbox_123',
+      account: 'acct_123',
+      amount: '25.00',
+      currency: 'NGN',
+      quoteId: 'pqt_123'
+    }),
+    (error) =>
+      error.exit === 'couldNotCreatePayout' &&
+      error.raw.message === 'Pass exactly one of amount or quoteId.'
+  )
+  assert.equal(calls.length, 0)
 })
 
 test('connect.payout.create uses an explicit destination without a lookup', async () => {

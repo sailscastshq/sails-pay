@@ -64,13 +64,28 @@ function payoutStatus(status) {
   return 'pending'
 }
 
+function toPayoutQuote(quote) {
+  return {
+    id: quote.quote_id,
+    fromCurrency: quote.from_currency,
+    toCurrency: quote.to_currency,
+    fromAmount: quote.from_amount,
+    toAmount: quote.to_amount,
+    exchangeRate: quote.exchange_rate,
+    expiresAt: quote.expires_at,
+    raw: quote
+  }
+}
+
 function toPayout(payout, { account }) {
   return {
     id: payout.id,
     account,
     amount: payout.amount,
     currency: payout.currency,
+    sourceCurrency: payout.source_currency || payout.currency,
     fee: payout.fee || null,
+    totalDebited: payout.total_debited || null,
     destination: payout.destination || null,
     status: payoutStatus(payout.status),
     raw: payout
@@ -82,5 +97,6 @@ module.exports = {
   toLink,
   toTransfer,
   toBalances,
+  toPayoutQuote,
   toPayout
 }
