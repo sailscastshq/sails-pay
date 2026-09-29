@@ -92,7 +92,74 @@ function toPayout(payout, { account }) {
   }
 }
 
+function toDestination(destination) {
+  return {
+    id: destination.id,
+    name: destination.name || null,
+    type:
+      {
+        bank_account: 'bank',
+        mobile_money: 'mobileMoney',
+        crypto_wallet: 'crypto'
+      }[destination.type] || destination.type,
+    currency: destination.currency,
+    status:
+      destination.status === 'approved'
+        ? 'approved'
+        : destination.status === 'rejected'
+          ? 'rejected'
+          : 'pending',
+    statusReason: destination.status_reason || null,
+    isUsable: destination.is_usable === true,
+    isDefault: destination.is_default === true,
+    accountNumber: destination.account_number || null,
+    accountName: destination.account_name || null,
+    bankCode: destination.bank_code || null,
+    bankName: destination.bank_name || null,
+    phoneNumber: destination.phone_number || null,
+    mobileProvider: destination.mobile_provider || null,
+    walletAddress: destination.wallet_address || null,
+    network: destination.network || null,
+    raw: destination
+  }
+}
+
+function destinationPayload(inputs) {
+  const body = {}
+  const fields = {
+    name: 'name',
+    currency: 'currency',
+    accountNumber: 'account_number',
+    accountName: 'account_name',
+    bankCode: 'bank_code',
+    bankName: 'bank_name',
+    phoneNumber: 'phone_number',
+    mobileProvider: 'mobile_provider',
+    walletAddress: 'wallet_address',
+    network: 'network',
+    isDefault: 'is_default',
+    metadata: 'metadata'
+  }
+  for (const [field, key] of Object.entries(fields)) {
+    if (
+      inputs[field] !== undefined &&
+      inputs[field] !== null &&
+      inputs[field] !== ''
+    )
+      body[key] = inputs[field]
+  }
+  if (inputs.type)
+    body.type = {
+      bank: 'bank_account',
+      mobileMoney: 'mobile_money',
+      crypto: 'crypto_wallet'
+    }[inputs.type]
+  return body
+}
+
 module.exports = {
+  toDestination,
+  destinationPayload,
   toAccount,
   toLink,
   toTransfer,

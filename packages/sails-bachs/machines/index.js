@@ -5,6 +5,16 @@ checkout.get = require('./checkout/get')
 module.exports = {
   checkout,
   connect: {
+    bank: {
+      list: require('./connect/bank/list'),
+      resolve: require('./connect/bank/resolve')
+    },
+    destination: {
+      list: require('./connect/destination/list'),
+      get: require('./connect/destination/get'),
+      create: require('./connect/destination/create'),
+      update: require('./connect/destination/update')
+    },
     account: {
       create: require('./connect/account/create'),
       get: require('./connect/account/get'),

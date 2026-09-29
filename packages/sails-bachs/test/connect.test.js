@@ -31,6 +31,8 @@ test('adapter exposes exactly the Connect surface', () => {
   assert.deepEqual(Object.keys(adapter.connect).sort(), [
     'account',
     'balance',
+    'bank',
+    'destination',
     'payout',
     'transfer'
   ])
