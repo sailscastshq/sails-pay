@@ -93,8 +93,8 @@ module.exports = require('machine').build({
         )
         const usable = destinations.filter((candidate) => candidate.is_usable)
         const chosen =
-          usable.find((candidate) => candidate.is_default) || usable[0]
-        if (!chosen) {
+          destinations.find((candidate) => candidate.is_default) || usable[0]
+        if (!chosen || !chosen.is_usable) {
           return exits.noDestination({
             message: `The account has no usable ${inputs.currency} payout destination.`
           })
