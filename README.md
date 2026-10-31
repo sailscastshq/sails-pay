@@ -218,7 +218,11 @@ await sails.pay.connect.transfer.create({
 })
 
 const balances = await sails.pay.connect.balance.get({ account: 'acct_...' })
-// [{ currency: 'NGN', available: '10000.00', pending: '0.00' }]
+// [{ currency: 'NGN', available: '10000.00', pending: '500.00',
+//    pendingSettlements: [{ date: '2026-11-04', amount: '500.00' }] }]
+// pendingSettlements contains provider-supplied dates and amounts for this
+// currency only (or [] when no schedule was supplied). Pending funds cannot
+// be withdrawn; only available funds can cover the withdrawal and its fee.
 ```
 
 Withdraw to their default destination for the currency, or pass `destination`:

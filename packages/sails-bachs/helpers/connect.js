@@ -54,7 +54,16 @@ function toBalances(response) {
   return ((response && response.balances) || []).map((balance) => ({
     currency: balance.currency,
     available: balance.available_balance,
-    pending: balance.pending_balance
+    pending: balance.pending_balance,
+    pendingSettlements: (
+      (response && response.pending_settlements_by_day) ||
+      []
+    )
+      .filter((settlement) => settlement.currency === balance.currency)
+      .map((settlement) => ({
+        date: settlement.date,
+        amount: settlement.total
+      }))
   }))
 }
 
