@@ -239,8 +239,18 @@ test('connect.balance.get acts as the account and returns one entry per currency
   assert.equal(calls[0].url, 'https://sandbox-api.bachs.io/v1/balances')
   assert.equal(calls[0].options.headers['X-Account-Id'], 'acct_123')
   assert.deepEqual(balances, [
-    { currency: 'NGN', available: '12000.00', pending: '0.00' },
-    { currency: 'USD', available: '5.00', pending: '1.00' }
+    {
+      currency: 'NGN',
+      available: '12000.00',
+      pending: '0.00',
+      pendingSettlements: []
+    },
+    {
+      currency: 'USD',
+      available: '5.00',
+      pending: '1.00',
+      pendingSettlements: []
+    }
   ])
 })
 
@@ -533,4 +543,42 @@ test('Connect errors surface the normalized Bachs error', async () => {
       error.exit === 'couldNotCreateTransfer' &&
       error.raw.code === 'INSUFFICIENT_BALANCE'
   )
+})
+
+test('balance settlement dates and decimal amounts stay in their own currency', async () => {
+  recordCalls([
+    {
+      body: {
+        balances: [
+          {
+            currency: 'USD',
+            available_balance: '0.00',
+            pending_balance: '5.00'
+          },
+          {
+            currency: 'NGN',
+            available_balance: '100.00',
+            pending_balance: '500.00'
+          }
+        ],
+        pending_settlements_by_day: [
+          { date: '2026-11-03', currency: 'USD', total: '3.00' },
+          { date: '2026-11-04', currency: 'NGN', total: '500.00' },
+          { date: '2026-11-05', currency: 'USD', total: '2.00' }
+        ]
+      }
+    }
+  ])
+  const balances = await adapter.connect.balance.get({
+    apiKey: 'sk_sandbox_123',
+    account: 'acct_123'
+  })
+  assert.deepEqual(balances[0].pendingSettlements, [
+    { date: '2026-11-03', amount: '3.00' },
+    { date: '2026-11-05', amount: '2.00' }
+  ])
+  assert.deepEqual(balances[1].pendingSettlements, [
+    { date: '2026-11-04', amount: '500.00' }
+  ])
+  assert.equal(balances[0].available, '0.00')
 })
