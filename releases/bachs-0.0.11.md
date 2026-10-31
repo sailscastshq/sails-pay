@@ -24,7 +24,9 @@ The adapter is an independently versioned npm workspace. This preparation change
 matching the previous adapter-only `0.0.10` release. The core `sails-pay` hook stays
 at `0.2.6`. There is no automated publish workflow or Changesets configuration in
 this checkout. Existing root `v0.2.x` tags belong to the core hook; do not use a
-root `v0.0.11` tag for this adapter release.
+root `v0.0.11` tag for this adapter release. The verified adapter tag convention is `bachs-v0.0.11`,
+following `bachs-v0.0.10`. Creating this GitHub release does not publish npm;
+Kelvin runs the npm command below separately.
 
 ## Checks before approval
 
@@ -83,8 +85,9 @@ Verified public repository and README:
 https://github.com/sailscastshq/sails-pay/blob/main/README.md#connect
 
 The README's advertised docs URL, https://docs.sailscasts.com/pay/, currently
-returns HTTP 404 and should not be the announcement destination until repaired.
-Use the public repository README instead. The settlement-schedule example on the
+returns HTTP 404. The working canonical Connect documentation is
+https://docs.sailscasts.com/sails-pay/connect. Use that URL or the repository
+README for the technical announcement. The settlement-schedule example on the
 feature branch must be merged before announcing that example as publicly live.
 
 Suggested release-note wording, to publish only once the package is live:
