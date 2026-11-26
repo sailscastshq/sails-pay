@@ -145,6 +145,20 @@ const charge = await sails.pay.verify({
 })
 ```
 
+### Bachs discounts and promo codes
+
+For a one-time checkout, pass at most one optional argument to `checkout`:
+
+| Argument                 | Effect                                                                                      |
+| ------------------------ | ------------------------------------------------------------------------------------------- |
+| `allowPromoCodes: true`  | Show the code-entry field on Bachs hosted checkout.                                         |
+| `promoCodeId: 'promo_…'` | Apply an existing promo code automatically, including its eligibility and expiration rules. |
+| `discountId`             | Apply a discount directly, without a promo code or redemption limits.                       |
+
+Send the full pre-discount amount. Bachs applies the discount to the whole checkout. Omit these arguments for regular checkouts. Create and manage discounts and codes in the Bachs dashboard, and use the verified checkout or webhook to reconcile the actual payment. Do not assume a code is still valid just because it was present at checkout creation.
+
+See [Bachs discounts and promo codes](https://docs.bachs.io/guides/payments/discounts).
+
 ## Bachs customer portal
 
 Create a fresh, short-lived customer portal session with an API key that has

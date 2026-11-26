@@ -118,6 +118,10 @@ module.exports = require('machine').build({
       type: 'string',
       description: 'Bachs promo code ID to apply automatically at checkout.'
     },
+    discountId: {
+      type: 'string',
+      description: 'Bachs discount ID to apply without a promo code.'
+    },
     expiresInMinutes: {
       type: 'number',
       description: 'Checkout expiry in minutes.'
@@ -190,12 +194,16 @@ module.exports = require('machine').build({
       }
     }
 
-    if (
-      inputs.allowPromoCodes !== undefined &&
-      inputs.promoCodeId !== undefined
-    ) {
+    const discountOptions = [
+      inputs.allowPromoCodes,
+      inputs.promoCodeId,
+      inputs.discountId
+    ].filter((option) => option !== undefined)
+
+    if (discountOptions.length > 1) {
       return exits.invalidRequest({
-        message: 'Provide either allowPromoCodes or promoCodeId, not both.'
+        message:
+          'Provide only one of allowPromoCodes, promoCodeId, or discountId.'
       })
     }
 
