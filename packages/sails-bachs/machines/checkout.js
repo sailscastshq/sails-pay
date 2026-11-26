@@ -110,6 +110,10 @@ module.exports = require('machine').build({
       description:
         'Per-currency amount overrides for a checkout that sets its own price.'
     },
+    allowPromoCodes: {
+      type: 'boolean',
+      description: 'Let buyers enter a promo code on the hosted checkout.'
+    },
     promoCodeId: {
       type: 'string',
       description: 'Bachs promo code ID to apply automatically at checkout.'
@@ -184,6 +188,15 @@ module.exports = require('machine').build({
       if (connectError) {
         return exits.invalidRequest(connectError)
       }
+    }
+
+    if (
+      inputs.allowPromoCodes !== undefined &&
+      inputs.promoCodeId !== undefined
+    ) {
+      return exits.invalidRequest({
+        message: 'Provide either allowPromoCodes or promoCodeId, not both.'
+      })
     }
 
     const payload = buildCheckoutSessionPayload(inputs, adapterConfig)

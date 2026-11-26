@@ -92,6 +92,53 @@ test('checkout applies a Bachs promo code without changing the item price', asyn
   assert.equal('discount_id' in calls[0], false)
 })
 
+test('checkout can show a promo code field or explicitly leave it off', async () => {
+  const calls = []
+  fetch.setFetchImplementation(async (url, options) => {
+    calls.push(JSON.parse(options.body))
+    return {
+      ok: true,
+      status: 201,
+      statusText: 'Created',
+      text: async () =>
+        JSON.stringify({ checkout_url: 'https://pay.bachs.io/c/promo' })
+    }
+  })
+
+  for (const allowPromoCodes of [true, false]) {
+    await checkout({
+      apiKey: 'sk_sandbox_123',
+      items: [{ product: 'prod_abc123' }],
+      allowPromoCodes
+    })
+  }
+
+  assert.equal(calls[0].allow_promo_codes, true)
+  assert.equal(calls[1].allow_promo_codes, false)
+  assert.equal('promo_code_id' in calls[0], false)
+})
+
+test('checkout rejects both promo modes before calling Bachs', async () => {
+  let called = false
+  fetch.setFetchImplementation(async () => {
+    called = true
+  })
+
+  for (const allowPromoCodes of [true, false]) {
+    await assert.rejects(
+      checkout({
+        apiKey: 'sk_sandbox_123',
+        items: [{ product: 'prod_abc123' }],
+        allowPromoCodes,
+        promoCodeId: 'promo_test'
+      }),
+      { code: 'invalidRequest' }
+    )
+  }
+
+  assert.equal(called, false)
+})
+
 test('checkout sends custom pricing and the buyer-selected amount', async () => {
   const calls = []
 
