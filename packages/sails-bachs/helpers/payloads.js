@@ -91,6 +91,7 @@ function buildCheckoutSessionPayload(inputs, adapterConfig = {}) {
     cancel_url: inputs.cancelUrl || adapterConfig.cancelUrl,
     reference: inputs.reference,
     metadata: inputs.metadata || checkoutData.custom,
+    promo_code_id: inputs.promoCodeId,
     expires_in_minutes: inputs.expiresInMinutes,
     transfer_data: inputs.connect && {
       destination: inputs.connect.destination

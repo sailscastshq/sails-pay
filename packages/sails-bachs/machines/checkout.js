@@ -110,6 +110,10 @@ module.exports = require('machine').build({
       description:
         'Per-currency amount overrides for a checkout that sets its own price.'
     },
+    promoCodeId: {
+      type: 'string',
+      description: 'Bachs promo code ID to apply automatically at checkout.'
+    },
     expiresInMinutes: {
       type: 'number',
       description: 'Checkout expiry in minutes.'

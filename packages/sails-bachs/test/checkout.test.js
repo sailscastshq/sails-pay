@@ -61,6 +61,37 @@ test('checkout creates a Bachs checkout session from camelCase inputs', async ()
   })
 })
 
+test('checkout applies a Bachs promo code without changing the item price', async () => {
+  const calls = []
+
+  fetch.setFetchImplementation(async (url, options) => {
+    calls.push(JSON.parse(options.body))
+
+    return {
+      ok: true,
+      status: 201,
+      statusText: 'Created',
+      text: async () =>
+        JSON.stringify({ checkout_url: 'https://pay.bachs.io/c/promo' })
+    }
+  })
+
+  const checkoutUrl = await checkout({
+    apiKey: 'sk_sandbox_123',
+    items: [{ product: 'prod_abc123', quantity: 1, amount: '5000.00' }],
+    billingCurrency: 'NGN',
+    promoCodeId: 'promo_test',
+    expiresInMinutes: 15
+  })
+
+  assert.equal(checkoutUrl, 'https://pay.bachs.io/c/promo')
+  assert.equal(calls[0].promo_code_id, 'promo_test')
+  assert.equal(calls[0].product_cart[0].pricing.amount, '5000.00')
+  assert.equal(calls[0].expires_in_minutes, 15)
+  assert.equal('allow_promo_codes' in calls[0], false)
+  assert.equal('discount_id' in calls[0], false)
+})
+
 test('checkout sends custom pricing and the buyer-selected amount', async () => {
   const calls = []
 
