@@ -61,6 +61,118 @@ test('checkout creates a Bachs checkout session from camelCase inputs', async ()
   })
 })
 
+test('checkout applies a Bachs promo code without changing the item price', async () => {
+  const calls = []
+
+  fetch.setFetchImplementation(async (url, options) => {
+    calls.push(JSON.parse(options.body))
+
+    return {
+      ok: true,
+      status: 201,
+      statusText: 'Created',
+      text: async () =>
+        JSON.stringify({ checkout_url: 'https://pay.bachs.io/c/promo' })
+    }
+  })
+
+  const checkoutUrl = await checkout({
+    apiKey: 'sk_sandbox_123',
+    items: [{ product: 'prod_abc123', quantity: 1, amount: '5000.00' }],
+    billingCurrency: 'NGN',
+    promoCodeId: 'promo_test',
+    expiresInMinutes: 15
+  })
+
+  assert.equal(checkoutUrl, 'https://pay.bachs.io/c/promo')
+  assert.equal(calls[0].promo_code_id, 'promo_test')
+  assert.equal(calls[0].product_cart[0].pricing.amount, '5000.00')
+  assert.equal(calls[0].expires_in_minutes, 15)
+  assert.equal('allow_promo_codes' in calls[0], false)
+  assert.equal('discount_id' in calls[0], false)
+})
+
+test('checkout can show a promo code field or explicitly leave it off', async () => {
+  const calls = []
+  fetch.setFetchImplementation(async (url, options) => {
+    calls.push(JSON.parse(options.body))
+    return {
+      ok: true,
+      status: 201,
+      statusText: 'Created',
+      text: async () =>
+        JSON.stringify({ checkout_url: 'https://pay.bachs.io/c/promo' })
+    }
+  })
+
+  for (const allowPromoCodes of [true, false]) {
+    await checkout({
+      apiKey: 'sk_sandbox_123',
+      items: [{ product: 'prod_abc123' }],
+      allowPromoCodes
+    })
+  }
+
+  assert.equal(calls[0].allow_promo_codes, true)
+  assert.equal(calls[1].allow_promo_codes, false)
+  assert.equal('promo_code_id' in calls[0], false)
+})
+
+test('checkout can apply a direct discount without a promo code', async () => {
+  let payload
+  fetch.setFetchImplementation(async (url, options) => {
+    payload = JSON.parse(options.body)
+    return {
+      ok: true,
+      status: 201,
+      statusText: 'Created',
+      text: async () =>
+        JSON.stringify({ checkout_url: 'https://pay.bachs.io/c/discount' })
+    }
+  })
+
+  await checkout({
+    apiKey: 'sk_sandbox_123',
+    items: [{ product: 'prod_abc123', amount: '5000.00' }],
+    discountId: 'disc_test'
+  })
+
+  assert.equal(payload.discount_id, 'disc_test')
+  assert.equal(payload.product_cart[0].pricing.amount, '5000.00')
+  assert.equal('promo_code_id' in payload, false)
+  assert.equal('allow_promo_codes' in payload, false)
+})
+
+test('checkout rejects conflicting discount modes before calling Bachs', async () => {
+  let called = false
+  fetch.setFetchImplementation(async () => {
+    called = true
+  })
+
+  for (const options of [
+    { allowPromoCodes: true, promoCodeId: 'promo_test' },
+    { allowPromoCodes: false, promoCodeId: 'promo_test' },
+    { allowPromoCodes: true, discountId: 'disc_test' },
+    { promoCodeId: 'promo_test', discountId: 'disc_test' },
+    {
+      allowPromoCodes: true,
+      promoCodeId: 'promo_test',
+      discountId: 'disc_test'
+    }
+  ]) {
+    await assert.rejects(
+      checkout({
+        apiKey: 'sk_sandbox_123',
+        items: [{ product: 'prod_abc123' }],
+        ...options
+      }),
+      { code: 'invalidRequest' }
+    )
+  }
+
+  assert.equal(called, false)
+})
+
 test('checkout sends custom pricing and the buyer-selected amount', async () => {
   const calls = []
 
